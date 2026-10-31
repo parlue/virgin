@@ -1,0 +1,798 @@
+> uci
+id name Virgin 0.7.1
+id author Dirk Sommerfeld / built with Cline
+option name Hash type spin default 32 min 1 max 4096
+option name Threads type spin default 4 min 0 max 64
+option name Adaptive type check default false
+option name Ponder type check default false
+option name UCI_LimitStrength type check default false
+option name UCI_Elo type spin default 2800 min 700 max 3000
+option name Style type combo default Ausgeglichen var Furchtsam var Vorsichtig var Ausgeglichen var Angriffslustig var Stier
+option name Boldness type spin default 30 min 10 max 50
+option name Bot type string default <empty>
+option name WeightsFile type string default <empty>
+option name Clear Hash type button
+option name ReloadWeights type button
+option name ResetWeights type button
+option name ShowWeights type button
+option name ListBots type button
+option name Material.Pawn.Mg type spin default 100 min 0 max 1600
+option name Material.Pawn.Eg type spin default 107 min 0 max 1600
+option name Material.Knight.Mg type spin default 395 min 0 max 1600
+option name Material.Knight.Eg type spin default 377 min 0 max 1600
+option name Material.Bishop.Mg type spin default 405 min 0 max 1600
+option name Material.Bishop.Eg type spin default 400 min 0 max 1600
+option name Material.Rook.Mg type spin default 595 min 0 max 1600
+option name Material.Rook.Eg type spin default 620 min 0 max 1600
+option name Material.Queen.Mg type spin default 1225 min 0 max 2000
+option name Material.Queen.Eg type spin default 1180 min 0 max 2000
+option name Pst.PawnMgAdvance type spin default 3 min -40 max 40
+option name Pst.PawnEgAdvance type spin default 6 min -40 max 40
+option name Pst.KnightCenter type spin default 10 min -40 max 40
+option name Pst.KnightRim type spin default -12 min -60 max 20
+option name Pst.BishopCenter type spin default 6 min -40 max 40
+option name Pst.BishopDiagonal type spin default 2 min -40 max 40
+option name Pst.RookRank7 type spin default 0 min -40 max 60
+option name Pst.RookFileCenter type spin default 4 min -40 max 40
+option name Pst.QueenCenter type spin default 3 min -40 max 40
+option name Pst.KingMgShelter type spin default 22 min -40 max 80
+option name Pst.KingMgCenter type spin default -12 min -60 max 40
+option name Pst.KingEgCenter type spin default 12 min -40 max 60
+option name Mobility.Knight type spin default 4 min 0 max 20
+option name Mobility.Bishop type spin default 5 min 0 max 20
+option name Mobility.Rook type spin default 2 min 0 max 20
+option name Mobility.Queen type spin default 1 min 0 max 20
+option name KingSafety.AttackUnits type spin default 100 min 0 max 400
+option name KingSafety.Saturation type spin default 256 min 64 max 4096
+option name KingSafety.ShieldMissing type spin default -22 min -120 max 0
+option name KingSafety.ShieldPawn type spin default 8 min 0 max 60
+option name KingSafety.OpenFileNearKing type spin default -28 min -160 max 0
+option name KingSafety.SemiOpenNearKing type spin default -14 min -160 max 0
+option name KingSafety.TropismN type spin default 12 min 0 max 60
+option name KingSafety.TropismB type spin default 10 min 0 max 60
+option name KingSafety.TropismR type spin default 8 min 0 max 60
+option name KingSafety.TropismQ type spin default 6 min 0 max 60
+option name KingSafety.SafeCheck type spin default 18 min 0 max 80
+option name KingSafety.UncastledMg type spin default -30 min -200 max 0
+option name KingSafety.KingRingAttack type spin default 6 min 0 max 40
+option name Pawns.Doubled type spin default -12 min -120 max 20
+option name Pawns.Isolated type spin default -15 min -120 max 20
+option name Pawns.Backward type spin default -8 min -120 max 20
+option name Pawns.Connected type spin default 4 min 0 max 60
+option name Pawns.PassedMg type spin default 100 min -40 max 200
+option name Pawns.PassedEg type spin default 100 min -40 max 300
+option name Pawns.Candidate type spin default 8 min 0 max 80
+option name Pawns.DoubledVsKing type spin default -18 min -120 max 20
+option name Rooks.OpenFile type spin default 25 min -40 max 160
+option name Rooks.SemiOpenFile type spin default 12 min -40 max 160
+option name Rooks.OnSeventh type spin default 8 min -40 max 120
+option name Rooks.Connected type spin default 10 min 0 max 80
+option name Rooks.Trapped type spin default -40 min -200 max 0
+option name Rooks.OpenFileVsKing type spin default 30 min -40 max 200
+option name Pieces.KnightOutpost type spin default 25 min 0 max 120
+option name Pieces.BishopPair type spin default 30 min 0 max 120
+option name Pieces.BadBishop type spin default -3 min -20 max 0
+option name Pieces.Fianchetto type spin default 12 min 0 max 80
+option name Threats.AttackedByLower type spin default 20 min 0 max 120
+option name Threats.Hanging type spin default 45 min 0 max 200
+option name Threats.Pinned type spin default 15 min 0 max 120
+option name Threats.Discovered type spin default 18 min 0 max 120
+option name Space.PerSafeSquare type spin default 8 min 0 max 40
+option name Initiative.Tempo type spin default 10 min 0 max 60
+option name Initiative.Progress type spin default 12 min 0 max 80
+option name Aggression.KingAttack type spin default 100 min 0 max 400
+option name Aggression.PawnStorm type spin default 100 min 0 max 400
+option name Aggression.Initiative type spin default 100 min 0 max 400
+option name Aggression.SacrificeTolerance type spin default 100 min 0 max 400
+option name Aggression.AvoidQueenTrade type spin default 100 min 0 max 400
+option name Complexity.Weight type spin default 100 min 0 max 400
+option name Drawish.OppositeBishops type spin default 60 min 0 max 200
+option name Drawish.Insufficient type spin default 0 min 0 max 200
+option name Endgame.KingActivity type spin default 100 min 0 max 400
+option name Endgame.PassedKingProximity type spin default 100 min 0 max 400
+option name Group.Material type spin default 100 min 0 max 400
+option name Group.Pst type spin default 100 min 0 max 400
+option name Group.Mobility type spin default 100 min 0 max 400
+option name Group.KingSafety type spin default 100 min 0 max 400
+option name Group.Pawns type spin default 100 min 0 max 400
+option name Group.Rooks type spin default 100 min 0 max 400
+option name Group.Pieces type spin default 100 min 0 max 400
+option name Group.Threats type spin default 100 min 0 max 400
+option name Group.Space type spin default 100 min 0 max 400
+option name Group.Initiative type spin default 100 min 0 max 400
+option name Group.Aggression type spin default 100 min 0 max 400
+option name Group.Complexity type spin default 100 min 0 max 400
+option name Group.Drawish type spin default 100 min 0 max 400
+option name Group.Endgame type spin default 100 min 0 max 400
+option name Misc.Contempt type spin default 0 min -100 max 100
+option name Misc.MoveNoise type spin default 0 min 0 max 400
+option name Elo.KnowledgeFloor type spin default 25 min 0 max 100
+uciok
+> setoption name Threads value 1
+> setoption name Hash value 1
+> setoption name Style value Furchtsam
+> setoption name Material.Pawn.Mg value 150
+> setoption name UCI_Elo value 700
+> setoption name UCI_LimitStrength value true
+> weights
+> eval
+> isready
+info string threads 1
+info string style Furchtsam applied (17 weights set)
+info string strength limited to 700 elo
+Material.Pawn.Mg = 150   # 0..1600, default 100
+Material.Pawn.Eg = 107   # 0..1600, default 107
+Material.Knight.Mg = 395   # 0..1600, default 395
+Material.Knight.Eg = 377   # 0..1600, default 377
+Material.Bishop.Mg = 405   # 0..1600, default 405
+Material.Bishop.Eg = 400   # 0..1600, default 400
+Material.Rook.Mg = 595   # 0..1600, default 595
+Material.Rook.Eg = 620   # 0..1600, default 620
+Material.Queen.Mg = 1225   # 0..2000, default 1225
+Material.Queen.Eg = 1180   # 0..2000, default 1180
+Pst.PawnMgAdvance = 3   # -40..40, default 3
+Pst.PawnEgAdvance = 6   # -40..40, default 6
+Pst.KnightCenter = 10   # -40..40, default 10
+Pst.KnightRim = -12   # -60..20, default -12
+Pst.BishopCenter = 6   # -40..40, default 6
+Pst.BishopDiagonal = 2   # -40..40, default 2
+Pst.RookRank7 = 0   # -40..60, default 0
+Pst.RookFileCenter = 4   # -40..40, default 4
+Pst.QueenCenter = 3   # -40..40, default 3
+Pst.KingMgShelter = 30   # -40..80, default 22
+Pst.KingMgCenter = -12   # -60..40, default -12
+Pst.KingEgCenter = 12   # -40..60, default 12
+Mobility.Knight = 4   # 0..20, default 4
+Mobility.Bishop = 5   # 0..20, default 5
+Mobility.Rook = 2   # 0..20, default 2
+Mobility.Queen = 1   # 0..20, default 1
+KingSafety.AttackUnits = 100   # 0..400, default 100
+KingSafety.Saturation = 256   # 64..4096, default 256
+KingSafety.ShieldMissing = -35   # -120..0, default -22
+KingSafety.ShieldPawn = 8   # 0..60, default 8
+KingSafety.OpenFileNearKing = -28   # -160..0, default -28
+KingSafety.SemiOpenNearKing = -14   # -160..0, default -14
+KingSafety.TropismN = 12   # 0..60, default 12
+KingSafety.TropismB = 10   # 0..60, default 10
+KingSafety.TropismR = 8   # 0..60, default 8
+KingSafety.TropismQ = 6   # 0..60, default 6
+KingSafety.SafeCheck = 18   # 0..80, default 18
+KingSafety.UncastledMg = -30   # -200..0, default -30
+KingSafety.KingRingAttack = 6   # 0..40, default 6
+Pawns.Doubled = -12   # -120..20, default -12
+Pawns.Isolated = -15   # -120..20, default -15
+Pawns.Backward = -8   # -120..20, default -8
+Pawns.Connected = 4   # 0..60, default 4
+Pawns.PassedMg = 100   # -40..200, default 100
+Pawns.PassedEg = 100   # -40..300, default 100
+Pawns.Candidate = 8   # 0..80, default 8
+Pawns.DoubledVsKing = -18   # -120..20, default -18
+Rooks.OpenFile = 25   # -40..160, default 25
+Rooks.SemiOpenFile = 12   # -40..160, default 12
+Rooks.OnSeventh = 8   # -40..120, default 8
+Rooks.Connected = 10   # 0..80, default 10
+Rooks.Trapped = -40   # -200..0, default -40
+Rooks.OpenFileVsKing = 15   # -40..200, default 30
+Pieces.KnightOutpost = 25   # 0..120, default 25
+Pieces.BishopPair = 30   # 0..120, default 30
+Pieces.BadBishop = -3   # -20..0, default -3
+Pieces.Fianchetto = 12   # 0..80, default 12
+Threats.AttackedByLower = 20   # 0..120, default 20
+Threats.Hanging = 45   # 0..200, default 45
+Threats.Pinned = 15   # 0..120, default 15
+Threats.Discovered = 18   # 0..120, default 18
+Space.PerSafeSquare = 8   # 0..40, default 8
+Initiative.Tempo = 10   # 0..60, default 10
+Initiative.Progress = 12   # 0..80, default 12
+Aggression.KingAttack = 40   # 0..400, default 100
+Aggression.PawnStorm = 0   # 0..400, default 100
+Aggression.Initiative = 30   # 0..400, default 100
+Aggression.SacrificeTolerance = 0   # 0..400, default 100
+Aggression.AvoidQueenTrade = 0   # 0..400, default 100
+Complexity.Weight = 100   # 0..400, default 100
+Drawish.OppositeBishops = 60   # 0..200, default 60
+Drawish.Insufficient = 0   # 0..200, default 0
+Endgame.KingActivity = 100   # 0..400, default 100
+Endgame.PassedKingProximity = 100   # 0..400, default 100
+Group.Material = 120   # 0..400, default 100
+Group.Pst = 100   # 0..400, default 100
+Group.Mobility = 90   # 0..400, default 100
+Group.KingSafety = 200   # 0..400, default 100
+Group.Pawns = 160   # 0..400, default 100
+Group.Rooks = 100   # 0..400, default 100
+Group.Pieces = 100   # 0..400, default 100
+Group.Threats = 110   # 0..400, default 100
+Group.Space = 100   # 0..400, default 100
+Group.Initiative = 100   # 0..400, default 100
+Group.Aggression = 40   # 0..400, default 100
+Group.Complexity = 30   # 0..400, default 100
+Group.Drawish = 130   # 0..400, default 100
+Group.Endgame = 100   # 0..400, default 100
+Misc.Contempt = -25   # -100..100, default 0
+Misc.MoveNoise = 0   # 0..400, default 0
+Elo.KnowledgeFloor = 25   # 0..100, default 25
+info string eval total 10 cp (material 0, pst 0, tempo 10, phase 24)
+info string terms: material=0 pst=0 mobility=0 kingSafety=0 pawns=0 rooks=0 pieces=0 threats=0 space=0 initiative=0 endgame=0 aggression=0 complexity=0
+readyok
+> setoption name Adaptive value true
+> weights
+> eval
+> isready
+info string Adaptive on: full strength, five candidates, fixed attack profile, hash 32768 KiB, threads 4
+Material.Pawn.Mg = 100   # 0..1600, default 100
+Material.Pawn.Eg = 107   # 0..1600, default 107
+Material.Knight.Mg = 395   # 0..1600, default 395
+Material.Knight.Eg = 377   # 0..1600, default 377
+Material.Bishop.Mg = 405   # 0..1600, default 405
+Material.Bishop.Eg = 400   # 0..1600, default 400
+Material.Rook.Mg = 595   # 0..1600, default 595
+Material.Rook.Eg = 620   # 0..1600, default 620
+Material.Queen.Mg = 1225   # 0..2000, default 1225
+Material.Queen.Eg = 1180   # 0..2000, default 1180
+Pst.PawnMgAdvance = 3   # -40..40, default 3
+Pst.PawnEgAdvance = 6   # -40..40, default 6
+Pst.KnightCenter = 10   # -40..40, default 10
+Pst.KnightRim = -12   # -60..20, default -12
+Pst.BishopCenter = 6   # -40..40, default 6
+Pst.BishopDiagonal = 2   # -40..40, default 2
+Pst.RookRank7 = 0   # -40..60, default 0
+Pst.RookFileCenter = 4   # -40..40, default 4
+Pst.QueenCenter = 3   # -40..40, default 3
+Pst.KingMgShelter = 22   # -40..80, default 22
+Pst.KingMgCenter = -12   # -60..40, default -12
+Pst.KingEgCenter = 12   # -40..60, default 12
+Mobility.Knight = 4   # 0..20, default 4
+Mobility.Bishop = 5   # 0..20, default 5
+Mobility.Rook = 2   # 0..20, default 2
+Mobility.Queen = 1   # 0..20, default 1
+KingSafety.AttackUnits = 100   # 0..400, default 100
+KingSafety.Saturation = 256   # 64..4096, default 256
+KingSafety.ShieldMissing = -22   # -120..0, default -22
+KingSafety.ShieldPawn = 8   # 0..60, default 8
+KingSafety.OpenFileNearKing = -28   # -160..0, default -28
+KingSafety.SemiOpenNearKing = -14   # -160..0, default -14
+KingSafety.TropismN = 12   # 0..60, default 12
+KingSafety.TropismB = 10   # 0..60, default 10
+KingSafety.TropismR = 8   # 0..60, default 8
+KingSafety.TropismQ = 6   # 0..60, default 6
+KingSafety.SafeCheck = 18   # 0..80, default 18
+KingSafety.UncastledMg = -30   # -200..0, default -30
+KingSafety.KingRingAttack = 6   # 0..40, default 6
+Pawns.Doubled = -12   # -120..20, default -12
+Pawns.Isolated = -15   # -120..20, default -15
+Pawns.Backward = -8   # -120..20, default -8
+Pawns.Connected = 4   # 0..60, default 4
+Pawns.PassedMg = 100   # -40..200, default 100
+Pawns.PassedEg = 100   # -40..300, default 100
+Pawns.Candidate = 8   # 0..80, default 8
+Pawns.DoubledVsKing = -18   # -120..20, default -18
+Rooks.OpenFile = 25   # -40..160, default 25
+Rooks.SemiOpenFile = 12   # -40..160, default 12
+Rooks.OnSeventh = 8   # -40..120, default 8
+Rooks.Connected = 10   # 0..80, default 10
+Rooks.Trapped = -40   # -200..0, default -40
+Rooks.OpenFileVsKing = 42   # -40..200, default 30
+Pieces.KnightOutpost = 25   # 0..120, default 25
+Pieces.BishopPair = 30   # 0..120, default 30
+Pieces.BadBishop = -3   # -20..0, default -3
+Pieces.Fianchetto = 12   # 0..80, default 12
+Threats.AttackedByLower = 20   # 0..120, default 20
+Threats.Hanging = 45   # 0..200, default 45
+Threats.Pinned = 15   # 0..120, default 15
+Threats.Discovered = 18   # 0..120, default 18
+Space.PerSafeSquare = 8   # 0..40, default 8
+Initiative.Tempo = 10   # 0..60, default 10
+Initiative.Progress = 12   # 0..80, default 12
+Aggression.KingAttack = 125   # 0..400, default 100
+Aggression.PawnStorm = 120   # 0..400, default 100
+Aggression.Initiative = 150   # 0..400, default 100
+Aggression.SacrificeTolerance = 120   # 0..400, default 100
+Aggression.AvoidQueenTrade = 110   # 0..400, default 100
+Complexity.Weight = 100   # 0..400, default 100
+Drawish.OppositeBishops = 60   # 0..200, default 60
+Drawish.Insufficient = 0   # 0..200, default 0
+Endgame.KingActivity = 100   # 0..400, default 100
+Endgame.PassedKingProximity = 100   # 0..400, default 100
+Group.Material = 100   # 0..400, default 100
+Group.Pst = 100   # 0..400, default 100
+Group.Mobility = 105   # 0..400, default 100
+Group.KingSafety = 110   # 0..400, default 100
+Group.Pawns = 100   # 0..400, default 100
+Group.Rooks = 100   # 0..400, default 100
+Group.Pieces = 100   # 0..400, default 100
+Group.Threats = 110   # 0..400, default 100
+Group.Space = 100   # 0..400, default 100
+Group.Initiative = 100   # 0..400, default 100
+Group.Aggression = 125   # 0..400, default 100
+Group.Complexity = 100   # 0..400, default 100
+Group.Drawish = 90   # 0..400, default 100
+Group.Endgame = 100   # 0..400, default 100
+Misc.Contempt = 15   # -100..100, default 0
+Misc.MoveNoise = 0   # 0..400, default 0
+Elo.KnowledgeFloor = 25   # 0..100, default 25
+info string eval total 10 cp (material 0, pst 0, tempo 10, phase 24)
+info string terms: material=0 pst=0 mobility=0 kingSafety=0 pawns=0 rooks=0 pieces=0 threats=0 space=0 initiative=0 endgame=0 aggression=0 complexity=0
+readyok
+> setoption name Hash value 128
+> setoption name Threads value 64
+> setoption name UCI_Elo value 700
+> setoption name UCI_LimitStrength value true
+> setoption name Style value Furchtsam
+> setoption name Boldness value 10
+> setoption name Bot value v700-furchtsam
+> setoption name WeightsFile value Z:/missing/weights.txt
+> setoption name Material.Pawn.Mg value 900
+> setoption name ResetWeights
+> setoption name ReloadWeights
+> setoption name Clear Hash
+> setoption name Ponder value true
+> weights
+> eval
+> isready
+info string Adaptive active: ignored option Hash
+info string Adaptive active: ignored option Threads
+info string Adaptive active: ignored option UCI_Elo
+info string Adaptive active: ignored option UCI_LimitStrength
+info string Adaptive active: ignored option Style
+info string Adaptive active: ignored option Boldness
+info string Adaptive active: ignored option Bot
+info string Adaptive active: ignored option WeightsFile
+info string Adaptive active: ignored option Material.Pawn.Mg
+info string Adaptive active: ignored option ResetWeights
+info string Adaptive active: ignored option ReloadWeights
+info string Adaptive active: ignored option Clear Hash
+info string Adaptive active: ignored option Ponder
+Material.Pawn.Mg = 100   # 0..1600, default 100
+Material.Pawn.Eg = 107   # 0..1600, default 107
+Material.Knight.Mg = 395   # 0..1600, default 395
+Material.Knight.Eg = 377   # 0..1600, default 377
+Material.Bishop.Mg = 405   # 0..1600, default 405
+Material.Bishop.Eg = 400   # 0..1600, default 400
+Material.Rook.Mg = 595   # 0..1600, default 595
+Material.Rook.Eg = 620   # 0..1600, default 620
+Material.Queen.Mg = 1225   # 0..2000, default 1225
+Material.Queen.Eg = 1180   # 0..2000, default 1180
+Pst.PawnMgAdvance = 3   # -40..40, default 3
+Pst.PawnEgAdvance = 6   # -40..40, default 6
+Pst.KnightCenter = 10   # -40..40, default 10
+Pst.KnightRim = -12   # -60..20, default -12
+Pst.BishopCenter = 6   # -40..40, default 6
+Pst.BishopDiagonal = 2   # -40..40, default 2
+Pst.RookRank7 = 0   # -40..60, default 0
+Pst.RookFileCenter = 4   # -40..40, default 4
+Pst.QueenCenter = 3   # -40..40, default 3
+Pst.KingMgShelter = 22   # -40..80, default 22
+Pst.KingMgCenter = -12   # -60..40, default -12
+Pst.KingEgCenter = 12   # -40..60, default 12
+Mobility.Knight = 4   # 0..20, default 4
+Mobility.Bishop = 5   # 0..20, default 5
+Mobility.Rook = 2   # 0..20, default 2
+Mobility.Queen = 1   # 0..20, default 1
+KingSafety.AttackUnits = 100   # 0..400, default 100
+KingSafety.Saturation = 256   # 64..4096, default 256
+KingSafety.ShieldMissing = -22   # -120..0, default -22
+KingSafety.ShieldPawn = 8   # 0..60, default 8
+KingSafety.OpenFileNearKing = -28   # -160..0, default -28
+KingSafety.SemiOpenNearKing = -14   # -160..0, default -14
+KingSafety.TropismN = 12   # 0..60, default 12
+KingSafety.TropismB = 10   # 0..60, default 10
+KingSafety.TropismR = 8   # 0..60, default 8
+KingSafety.TropismQ = 6   # 0..60, default 6
+KingSafety.SafeCheck = 18   # 0..80, default 18
+KingSafety.UncastledMg = -30   # -200..0, default -30
+KingSafety.KingRingAttack = 6   # 0..40, default 6
+Pawns.Doubled = -12   # -120..20, default -12
+Pawns.Isolated = -15   # -120..20, default -15
+Pawns.Backward = -8   # -120..20, default -8
+Pawns.Connected = 4   # 0..60, default 4
+Pawns.PassedMg = 100   # -40..200, default 100
+Pawns.PassedEg = 100   # -40..300, default 100
+Pawns.Candidate = 8   # 0..80, default 8
+Pawns.DoubledVsKing = -18   # -120..20, default -18
+Rooks.OpenFile = 25   # -40..160, default 25
+Rooks.SemiOpenFile = 12   # -40..160, default 12
+Rooks.OnSeventh = 8   # -40..120, default 8
+Rooks.Connected = 10   # 0..80, default 10
+Rooks.Trapped = -40   # -200..0, default -40
+Rooks.OpenFileVsKing = 42   # -40..200, default 30
+Pieces.KnightOutpost = 25   # 0..120, default 25
+Pieces.BishopPair = 30   # 0..120, default 30
+Pieces.BadBishop = -3   # -20..0, default -3
+Pieces.Fianchetto = 12   # 0..80, default 12
+Threats.AttackedByLower = 20   # 0..120, default 20
+Threats.Hanging = 45   # 0..200, default 45
+Threats.Pinned = 15   # 0..120, default 15
+Threats.Discovered = 18   # 0..120, default 18
+Space.PerSafeSquare = 8   # 0..40, default 8
+Initiative.Tempo = 10   # 0..60, default 10
+Initiative.Progress = 12   # 0..80, default 12
+Aggression.KingAttack = 125   # 0..400, default 100
+Aggression.PawnStorm = 120   # 0..400, default 100
+Aggression.Initiative = 150   # 0..400, default 100
+Aggression.SacrificeTolerance = 120   # 0..400, default 100
+Aggression.AvoidQueenTrade = 110   # 0..400, default 100
+Complexity.Weight = 100   # 0..400, default 100
+Drawish.OppositeBishops = 60   # 0..200, default 60
+Drawish.Insufficient = 0   # 0..200, default 0
+Endgame.KingActivity = 100   # 0..400, default 100
+Endgame.PassedKingProximity = 100   # 0..400, default 100
+Group.Material = 100   # 0..400, default 100
+Group.Pst = 100   # 0..400, default 100
+Group.Mobility = 105   # 0..400, default 100
+Group.KingSafety = 110   # 0..400, default 100
+Group.Pawns = 100   # 0..400, default 100
+Group.Rooks = 100   # 0..400, default 100
+Group.Pieces = 100   # 0..400, default 100
+Group.Threats = 110   # 0..400, default 100
+Group.Space = 100   # 0..400, default 100
+Group.Initiative = 100   # 0..400, default 100
+Group.Aggression = 125   # 0..400, default 100
+Group.Complexity = 100   # 0..400, default 100
+Group.Drawish = 90   # 0..400, default 100
+Group.Endgame = 100   # 0..400, default 100
+Misc.Contempt = 15   # -100..100, default 0
+Misc.MoveNoise = 0   # 0..400, default 0
+Elo.KnowledgeFloor = 25   # 0..100, default 25
+info string eval total 10 cp (material 0, pst 0, tempo 10, phase 24)
+info string terms: material=0 pst=0 mobility=0 kingSafety=0 pawns=0 rooks=0 pieces=0 threats=0 space=0 initiative=0 endgame=0 aggression=0 complexity=0
+readyok
+> ucinewgame
+> position startpos
+> isready
+readyok
+> go depth 4
+info depth 1 seldepth 1 multipv 1 score cp 91 nodes 262 time 0 pv d2d4
+info depth 1 seldepth 1 multipv 2 score cp 90 nodes 262 time 0 pv e2e4
+info depth 1 seldepth 1 multipv 3 score cp 78 nodes 262 time 0 pv e2e3
+info depth 1 seldepth 1 multipv 4 score cp 70 nodes 262 time 0 pv d2d3
+info depth 1 seldepth 1 multipv 5 score cp 68 nodes 262 time 0 pv g1f3
+info depth 2 seldepth 3 multipv 1 score cp 10 nodes 1001 time 0 pv d2d4 d7d5
+info depth 2 seldepth 3 multipv 2 score cp 10 nodes 1001 time 0 pv e2e4 e7e5
+info depth 2 seldepth 3 multipv 3 score cp -2 nodes 1001 time 0 pv e2e3 e7e5
+info depth 2 seldepth 3 multipv 4 score cp -12 nodes 1001 time 0 pv g1f3 d7d5
+info depth 2 seldepth 3 multipv 5 score cp -17 nodes 1001 time 0 pv d2d3 e7e5
+info depth 3 seldepth 8 multipv 1 score cp 72 nodes 2847 time 1 pv e2e4 d7d5 b1c3
+info depth 3 seldepth 8 multipv 2 score cp 68 nodes 2847 time 1 pv d2d4 d7d5 g1f3
+info depth 3 seldepth 8 multipv 3 score cp 68 nodes 2847 time 1 pv g1f3 d7d5 d2d4
+info depth 3 seldepth 8 multipv 4 score cp 60 nodes 2847 time 1 pv e2e3 e7e5 f1c4
+info depth 3 seldepth 8 multipv 5 score cp 41 nodes 2847 time 1 pv d2d3 e7e5 g1f3
+info depth 4 seldepth 10 multipv 1 score cp 14 nodes 6980 time 3 pv e2e4 d7d5 b1c3 g8f6
+info depth 4 seldepth 10 multipv 2 score cp 14 nodes 6980 time 3 pv b1c3 d7d5 e2e4 g8f6
+info depth 4 seldepth 10 multipv 3 score cp 10 nodes 6980 time 3 pv d2d4 g8f6 g1f3 d7d5
+info depth 4 seldepth 10 multipv 4 score cp 10 nodes 6980 time 3 pv g1f3 d7d5 d2d4 g8f6
+info depth 4 seldepth 10 multipv 5 score cp 5 nodes 6980 time 3 pv e2e3 g8f6 b1c3 e7e5
+info string adaptive eroeffnung player -14 after -14 accuracy -1 best e2e4 selected e2e4 samples 0 helped 0 adjusts 0
+info depth 4 score cp 14 nodes 6980 time 3 pv e2e4 d7d5 b1c3 g8f6
+bestmove e2e4
+> go depth 4
+info depth 1 seldepth 1 multipv 1 score cp 91 nodes 190 time 0 pv d2d4
+info depth 1 seldepth 1 multipv 2 score cp 90 nodes 190 time 0 pv e2e4
+info depth 1 seldepth 1 multipv 3 score cp 78 nodes 190 time 0 pv e2e3
+info depth 1 seldepth 1 multipv 4 score cp 70 nodes 190 time 0 pv d2d3
+info depth 1 seldepth 1 multipv 5 score cp 46 nodes 190 time 0 pv b2b3
+info depth 2 seldepth 8 multipv 1 score cp 18 nodes 2242 time 0 pv e2e4 d7d5
+info depth 2 seldepth 8 multipv 2 score cp 10 nodes 2242 time 0 pv d2d4 d7d5
+info depth 2 seldepth 8 multipv 3 score cp 9 nodes 2242 time 0 pv e2e3 d7d5
+info depth 2 seldepth 8 multipv 4 score cp -11 nodes 2242 time 0 pv d2d3 d7d5
+info depth 2 seldepth 8 multipv 5 score cp -12 nodes 2242 time 0 pv g1f3 d7d5
+info depth 3 seldepth 8 multipv 1 score cp 72 nodes 3518 time 1 pv e2e4 d7d5 b1c3
+info depth 3 seldepth 8 multipv 2 score cp 68 nodes 3518 time 1 pv d2d4 d7d5 g1f3
+info depth 3 seldepth 8 multipv 3 score cp 68 nodes 3518 time 1 pv g1f3 d7d5 d2d4
+info depth 3 seldepth 8 multipv 4 score cp 60 nodes 3518 time 1 pv e2e3 d7d5 g1f3
+info depth 3 seldepth 8 multipv 5 score cp 41 nodes 3518 time 1 pv d2d3 e7e5 g1f3
+info depth 4 seldepth 10 multipv 1 score cp 14 nodes 4661 time 1 pv e2e4 d7d5 b1c3 g8f6
+info depth 4 seldepth 10 multipv 2 score cp 14 nodes 4661 time 1 pv b1c3 d7d5 e2e4 g8f6
+info depth 4 seldepth 10 multipv 3 score cp 10 nodes 4661 time 1 pv d2d4 d7d5 g1f3 g8f6
+info depth 4 seldepth 10 multipv 4 score cp 10 nodes 4661 time 1 pv g1f3 d7d5 d2d4 g8f6
+info depth 4 seldepth 10 multipv 5 score cp 2 nodes 4661 time 1 pv e2e3 d7d5 g1f3 g8f6
+info string adaptive eroeffnung player -14 after -14 accuracy -1 best e2e4 selected e2e4 samples 0 helped 0 adjusts 0
+info depth 4 score cp 14 nodes 4661 time 2 pv e2e4 d7d5 b1c3 g8f6
+bestmove e2e4
+> position startpos moves e2e4 g8h6
+> isready
+readyok
+> go depth 3
+info depth 1 seldepth 1 multipv 1 score cp 202 nodes 310 time 0 pv d2d4
+info depth 1 seldepth 1 multipv 2 score cp 177 nodes 310 time 0 pv f1c4
+info depth 1 seldepth 1 multipv 3 score cp 168 nodes 310 time 0 pv b1c3
+info depth 1 seldepth 1 multipv 4 score cp 164 nodes 310 time 0 pv g1f3
+info depth 1 seldepth 1 multipv 5 score cp 150 nodes 310 time 0 pv b2b4
+info depth 2 seldepth 7 multipv 1 score cp 126 nodes 1392 time 0 pv d2d4 e7e6
+info depth 2 seldepth 7 multipv 2 score cp 94 nodes 1392 time 0 pv f1c4 e7e6
+info depth 2 seldepth 7 multipv 3 score cp 92 nodes 1392 time 0 pv g1f3 d7d5
+info depth 2 seldepth 7 multipv 4 score cp 91 nodes 1392 time 0 pv b1c3 e7e5
+info depth 2 seldepth 7 multipv 5 score cp 78 nodes 1392 time 0 pv b2b4 d7d5
+info depth 3 seldepth 10 multipv 1 score cp 181 nodes 4432 time 2 pv d2d4 d7d5 b1c3
+info depth 3 seldepth 10 multipv 2 score cp 181 nodes 4432 time 2 pv b1c3 e7e6 d2d4
+info depth 3 seldepth 10 multipv 3 score cp 171 nodes 4432 time 2 pv f1c4 e7e6 d2d4
+info depth 3 seldepth 10 multipv 4 score cp 148 nodes 4432 time 2 pv g1f3 d7d5 b1c3
+info depth 3 seldepth 10 multipv 5 score cp 146 nodes 4432 time 2 pv f1b5 e7e5 d2d4
+info string adaptive eroeffnung player -181 after -181 accuracy 0 best d2d4 selected d2d4 samples 1 helped 0 adjusts 0
+info depth 3 score cp 181 nodes 4432 time 2 pv d2d4 d7d5 b1c3
+bestmove d2d4
+> ucinewgame
+> position startpos
+> isready
+readyok
+> go depth 3
+info depth 1 seldepth 1 multipv 1 score cp 91 nodes 232 time 0 pv d2d4
+info depth 1 seldepth 1 multipv 2 score cp 90 nodes 232 time 0 pv e2e4
+info depth 1 seldepth 1 multipv 3 score cp 78 nodes 232 time 0 pv e2e3
+info depth 1 seldepth 1 multipv 4 score cp 70 nodes 232 time 0 pv d2d3
+info depth 1 seldepth 1 multipv 5 score cp 64 nodes 232 time 0 pv b1c3
+info depth 2 seldepth 8 multipv 1 score cp 18 nodes 1620 time 0 pv e2e4 d7d5
+info depth 2 seldepth 8 multipv 2 score cp 10 nodes 1620 time 0 pv d2d4 d7d5
+info depth 2 seldepth 8 multipv 3 score cp 9 nodes 1620 time 0 pv e2e3 d7d5
+info depth 2 seldepth 8 multipv 4 score cp -11 nodes 1620 time 0 pv d2d3 d7d5
+info depth 2 seldepth 8 multipv 5 score cp -12 nodes 1620 time 0 pv g1f3 d7d5
+info depth 3 seldepth 8 multipv 1 score cp 72 nodes 2234 time 0 pv e2e4 d7d5 b1c3
+info depth 3 seldepth 8 multipv 2 score cp 68 nodes 2234 time 0 pv d2d4 d7d5 g1f3
+info depth 3 seldepth 8 multipv 3 score cp 68 nodes 2234 time 0 pv g1f3 d7d5 d2d4
+info depth 3 seldepth 8 multipv 4 score cp 60 nodes 2234 time 0 pv e2e3 d7d5 g1f3
+info depth 3 seldepth 8 multipv 5 score cp 41 nodes 2234 time 0 pv d2d3 e7e5 g1f3
+info string adaptive eroeffnung player -72 after -72 accuracy -1 best e2e4 selected e2e4 samples 0 helped 0 adjusts 0
+info depth 3 score cp 72 nodes 2234 time 0 pv e2e4 d7d5 b1c3
+bestmove e2e4
+> go infinite
+info depth 1 seldepth 1 multipv 1 score cp 91 nodes 198 time 0 pv d2d4
+info depth 1 seldepth 1 multipv 2 score cp 90 nodes 198 time 0 pv e2e4
+info depth 1 seldepth 1 multipv 3 score cp 78 nodes 198 time 0 pv e2e3
+info depth 1 seldepth 1 multipv 4 score cp 68 nodes 198 time 0 pv g1f3
+info depth 1 seldepth 1 multipv 5 score cp 46 nodes 198 time 0 pv b2b3
+info depth 2 seldepth 8 multipv 1 score cp 18 nodes 1003 time 0 pv e2e4 d7d5
+> setoption name UCI_Elo value 700
+info depth 2 seldepth 8 multipv 2 score cp 10 nodes 1003 time 0 pv d2d4 d7d5
+info depth 2 seldepth 8 multipv 3 score cp 9 nodes 1003 time 0 pv e2e3 d7d5
+info depth 2 seldepth 8 multipv 4 score cp -12 nodes 1003 time 0 pv g1f3 d7d5
+info depth 2 seldepth 8 multipv 5 score cp -17 nodes 1003 time 0 pv d2d3 e7e5
+info depth 3 seldepth 8 multipv 1 score cp 72 nodes 1735 time 0 pv e2e4 d7d5 b1c3
+info depth 3 seldepth 8 multipv 2 score cp 68 nodes 1735 time 0 pv d2d4 d7d5 g1f3
+info depth 3 seldepth 8 multipv 3 score cp 68 nodes 1735 time 0 pv g1f3 d7d5 d2d4
+info depth 3 seldepth 8 multipv 4 score cp 60 nodes 1735 time 0 pv e2e3 d7d5 g1f3
+info depth 3 seldepth 8 multipv 5 score cp 41 nodes 1735 time 0 pv d2d3 e7e5 g1f3
+info string Adaptive active: ignored option UCI_Elo
+> isready
+readyok
+> stop
+info depth 4 seldepth 10 multipv 1 score cp 14 nodes 3851 time 0 pv e2e4 d7d5 b1c3 g8f6
+info depth 4 seldepth 10 multipv 2 score cp 14 nodes 3851 time 0 pv b1c3 d7d5 e2e4 g8f6
+info depth 4 seldepth 10 multipv 3 score cp 10 nodes 3851 time 0 pv d2d4 d7d5 g1f3 g8f6
+info depth 4 seldepth 10 multipv 4 score cp 10 nodes 3851 time 0 pv g1f3 d7d5 d2d4 g8f6
+info depth 4 seldepth 10 multipv 5 score cp 2 nodes 3851 time 0 pv e2e3 d7d5 g1f3 g8f6
+info string adaptive eroeffnung player -14 after -14 accuracy -1 best e2e4 selected e2e4 samples 0 helped 0 adjusts 0
+info depth 4 score cp 14 nodes 4306 time 1 pv e2e4 d7d5 b1c3 g8f6
+bestmove e2e4
+> ucinewgame
+> position fen rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+> isready
+readyok
+> go movetime 1000
+info depth 1 seldepth 1 multipv 1 score cp 91 nodes 190 time 0 pv d2d4
+info depth 1 seldepth 1 multipv 2 score cp 90 nodes 190 time 0 pv e2e4
+info depth 1 seldepth 1 multipv 3 score cp 78 nodes 190 time 0 pv e2e3
+info depth 1 seldepth 1 multipv 4 score cp 70 nodes 190 time 0 pv d2d3
+info depth 1 seldepth 1 multipv 5 score cp 46 nodes 190 time 0 pv b2b3
+info depth 2 seldepth 8 multipv 1 score cp 18 nodes 2474 time 0 pv e2e4 d7d5
+info depth 2 seldepth 8 multipv 2 score cp 10 nodes 2474 time 0 pv d2d4 d7d5
+info depth 2 seldepth 8 multipv 3 score cp 9 nodes 2474 time 0 pv e2e3 d7d5
+info depth 2 seldepth 8 multipv 4 score cp -11 nodes 2474 time 0 pv d2d3 d7d5
+info depth 2 seldepth 8 multipv 5 score cp -12 nodes 2474 time 0 pv g1f3 d7d5
+info depth 3 seldepth 8 multipv 1 score cp 72 nodes 3548 time 0 pv e2e4 d7d5 b1c3
+info depth 3 seldepth 8 multipv 2 score cp 68 nodes 3548 time 0 pv d2d4 d7d5 g1f3
+info depth 3 seldepth 8 multipv 3 score cp 68 nodes 3548 time 0 pv g1f3 d7d5 d2d4
+info depth 3 seldepth 8 multipv 4 score cp 45 nodes 3548 time 0 pv e2e3 e7e5 g1f3
+info depth 3 seldepth 8 multipv 5 score cp 41 nodes 3548 time 0 pv d2d3 e7e5 g1f3
+info depth 4 seldepth 10 multipv 1 score cp 14 nodes 5369 time 1 pv e2e4 d7d5 b1c3 g8f6
+info depth 4 seldepth 10 multipv 2 score cp 14 nodes 5369 time 1 pv b1c3 d7d5 e2e4 g8f6
+info depth 4 seldepth 10 multipv 3 score cp 10 nodes 5369 time 1 pv d2d4 d7d5 g1f3 g8f6
+info depth 4 seldepth 10 multipv 4 score cp 10 nodes 5369 time 1 pv g1f3 d7d5 d2d4 g8f6
+info depth 4 seldepth 10 multipv 5 score cp 2 nodes 5369 time 1 pv e2e3 d7d5 g1f3 g8f6
+info depth 5 seldepth 11 multipv 1 score cp 74 nodes 17570 time 6 pv d2d4 g8f6 g1f3 d7d6 b1c3
+info depth 5 seldepth 11 multipv 2 score cp 74 nodes 17570 time 6 pv g1f3 g8f6 d2d4 d7d6 b1c3
+info depth 5 seldepth 11 multipv 3 score cp 57 nodes 17570 time 6 pv b1c3 d7d5 g1f3 g8f6 d2d4
+info depth 5 seldepth 11 multipv 4 score cp 43 nodes 17570 time 6 pv e2e4 d7d5 b1c3 g8f6 f1d3
+info depth 5 seldepth 11 multipv 5 score cp 43 nodes 17570 time 6 pv e2e3 g8f6 d2d4 d7d5 g1f3
+info depth 6 seldepth 15 multipv 1 score cp 13 nodes 31218 time 9 pv e2e4 d7d5 e4e5 c8d7 d2d4 e7e6
+info depth 6 seldepth 15 multipv 2 score cp 10 nodes 31218 time 9 pv d2d4 g8f6 g1f3 d7d5 f3e5 f6e4
+info depth 6 seldepth 15 multipv 3 score cp 1 nodes 31218 time 9 pv g1f3 g8f6 d2d4 d7d5 c1f4 f6e4
+info depth 6 seldepth 15 multipv 4 score cp -1 nodes 31218 time 9 pv b1c3 d7d5 g1f3 g8f6 d2d4 c8f5
+info depth 6 seldepth 15 multipv 5 score cp -1 nodes 31218 time 9 pv e2e3 g8f6 g1f3 d7d5 b1c3 c8f5
+info depth 7 seldepth 19 multipv 1 score cp 69 nodes 93890 time 43 pv e2e4 d7d5 e4e5 e7e6 d2d4 c8d7 b1c3
+info depth 7 seldepth 19 multipv 2 score cp 66 nodes 93890 time 43 pv d2d4 g8f6 b1c3 d7d5 g1f3 c8f5 f3e5
+info depth 7 seldepth 19 multipv 3 score cp 66 nodes 93890 time 43 pv g1f3 g8f6 d2d4 d7d5 b1c3 c8f5 f3e5
+info depth 7 seldepth 19 multipv 4 score cp 30 nodes 93890 time 43 pv b1c3 d7d5 e2e4 g8f6 e4e5 f6e4 c3e4 d5e4
+info depth 7 seldepth 19 multipv 5 score cp 24 nodes 93890 time 43 pv e2e3 d7d5 d2d4 g8f6 f1d3 f6e4 d3e4 d5e4
+info depth 8 seldepth 21 multipv 1 score cp 18 nodes 162406 time 79 pv e2e4 d7d5 e4d5 g8f6 b1c3 c7c6 d2d4 f6d5 c3d5 d8d5
+info depth 8 seldepth 21 multipv 2 score cp 17 nodes 162406 time 79 pv d2d4 g8f6 b1c3 d7d5 g1f3 c8f5 f3e5 b8c6
+info depth 8 seldepth 21 multipv 3 score cp 17 nodes 162406 time 79 pv g1f3 d7d5 b1c3 c8f5 d2d4 g8f6 f3e5 b8c6
+info depth 8 seldepth 21 multipv 4 score cp 17 nodes 162406 time 79 pv b1c3 d7d5 g1f3 c8f5 d2d4 g8f6 f3e5 b8c6
+info depth 8 seldepth 21 multipv 5 score cp 1 nodes 162406 time 79 pv e2e3 g8f6 g1f3 b8c6 b1c3 e7e6 f1d3 d7d5
+info depth 9 seldepth 23 multipv 1 score cp 52 nodes 386810 time 239 pv e2e4 d7d5 e4e5 c8f5 d2d4 b8c6 f1b5 a7a6 b5c6 b7c6
+info depth 9 seldepth 23 multipv 2 score cp 40 nodes 386810 time 239 pv d2d4 g8f6 g1f3 d7d5 e2e3 b8c6 f1b5 a7a6 b5c6 b7c6
+info depth 9 seldepth 23 multipv 3 score cp 40 nodes 386810 time 239 pv g1f3 d7d5 e2e3 g8f6 b1c3 b8c6 f1b5 a7a6 b5c6 b7c6
+info depth 9 seldepth 23 multipv 4 score cp 40 nodes 386810 time 239 pv b1c3 d7d5 e2e3 g8f6 g1f3 b8c6 f1b5 a7a6 b5c6 b7c6
+info depth 9 seldepth 23 multipv 5 score cp 40 nodes 386810 time 239 pv e2e3 b8c6 d2d4 d7d5 g1f3 g8f6 f1b5 a7a6 b5c6 b7c6
+info depth 10 seldepth 24 multipv 1 score cp 60 nodes 860063 time 544 pv e2e4 d7d5 e4e5 c8f5 d2d4 e7e6 g1f3 b8d7 f1d3 f5d3 d1d3
+info depth 10 seldepth 24 multipv 2 score cp 42 nodes 860063 time 544 pv g1f3 d7d5 d2d4 g8f6 e2e3 c7c5 b1c3 d8a5 c1d2 b8c6
+info depth 10 seldepth 24 multipv 3 score cp 40 nodes 860063 time 544 pv d2d4 g8f6 g1f3 d7d5 e2e3 b8c6 f1b5 a7a6 b5c6 b7c6
+info depth 10 seldepth 24 multipv 4 score cp 36 nodes 860063 time 544 pv b1c3 g8f6 g1f3 d7d5 e2e3 c8g4 d2d4 g4f3 d1f3 e7e6
+info depth 10 seldepth 24 multipv 5 score cp 23 nodes 860063 time 544 pv e2e3 e7e5 d2d4 e5e4 d4d5 g8f6 b1c3 f8b4 a2a3 b4c3 b2c3
+info string adaptive eroeffnung player -60 after -60 accuracy -1 best e2e4 selected e2e4 samples 0 helped 0 adjusts 0
+info depth 10 score cp 60 nodes 1618844 time 1000 pv e2e4 d7d5 e4e5 c8f5 d2d4 e7e6 g1f3 b8d7 f1d3 f5d3 d1d3
+bestmove e2e4
+> ucinewgame
+> position fen r2q1rk1/pp3ppp/2pp1n2/2b1p1B1/2B1P3/2NP1N2/PPP2PPP/R2Q1RK1 w - - 4 8
+> isready
+readyok
+> go movetime 1000
+info depth 1 seldepth 5 multipv 1 score cp 900 nodes 765 time 0 pv d3d4
+info depth 1 seldepth 5 multipv 2 score cp 862 nodes 765 time 0 pv a2a3
+info depth 1 seldepth 5 multipv 3 score cp 861 nodes 765 time 0 pv d1e2
+info depth 1 seldepth 5 multipv 4 score cp 854 nodes 765 time 0 pv a2a4
+info depth 1 seldepth 5 multipv 5 score cp 852 nodes 765 time 0 pv a1c1
+info depth 2 seldepth 10 multipv 1 score cp 911 nodes 6384 time 3 pv d3d4 e5d4 f3d4
+info depth 2 seldepth 10 multipv 2 score cp 828 nodes 6384 time 3 pv d1e2 b7b5
+info depth 2 seldepth 10 multipv 3 score cp 808 nodes 6384 time 3 pv c4b3 b7b5
+info depth 2 seldepth 10 multipv 4 score cp 800 nodes 6384 time 3 pv a2a3 d6d5
+info depth 2 seldepth 10 multipv 5 score cp 794 nodes 6384 time 3 pv g5f6 d8f6
+info depth 3 seldepth 10 multipv 1 score cp 911 nodes 16360 time 7 pv d3d4 e5d4 f3d4
+info depth 3 seldepth 10 multipv 2 score cp 836 nodes 16360 time 7 pv a2a3 h7h6 b2b4 h6g5 b4c5
+info depth 3 seldepth 10 multipv 3 score cp 816 nodes 16360 time 7 pv c3a4 b7b5 a4c5 b5c4
+info depth 3 seldepth 10 multipv 4 score cp 815 nodes 16360 time 7 pv a2a4 h7h6 g5f6 d8f6
+info depth 3 seldepth 10 multipv 5 score cp 814 nodes 16360 time 7 pv d1e2 b7b5 c4b3
+info depth 4 seldepth 15 multipv 1 score cp 825 nodes 29022 time 12 pv a2a3 h7h6 g5f6 d8f6
+info depth 4 seldepth 15 multipv 2 score cp 816 nodes 29022 time 12 pv c3a4 b7b5 a4c5 b5c4
+info depth 4 seldepth 15 multipv 3 score cp 815 nodes 29022 time 12 pv a2a4 h7h6 g5f6 d8f6
+info depth 4 seldepth 15 multipv 4 score cp 813 nodes 29022 time 12 pv d3d4 e5d4 f3d4 d6d5 e4d5 c6d5
+info depth 4 seldepth 15 multipv 5 score cp 806 nodes 29022 time 12 pv d1e2 b7b5 c4b3 d8c7
+info depth 5 seldepth 16 multipv 1 score cp 829 nodes 73321 time 32 pv a2a4 h7h6 g5f6 d8f6 a4a5
+info depth 5 seldepth 16 multipv 2 score cp 815 nodes 73321 time 32 pv c3a4 b7b5 a4c5 d6c5 c4b3
+info depth 5 seldepth 16 multipv 3 score cp 813 nodes 73321 time 32 pv d3d4 e5d4 f3d4 d6d5 e4d5 c6d5
+info depth 5 seldepth 16 multipv 4 score cp 809 nodes 73321 time 32 pv a2a3 b7b5 c4b3 h7h6 g5d2
+info depth 5 seldepth 16 multipv 5 score cp 806 nodes 73321 time 32 pv c4b3 h7h6 g5d2 d8c7 a2a3
+info depth 6 seldepth 17 multipv 1 score cp 815 nodes 108590 time 49 pv a2a4 h7h6 g5f6 d8f6 a4a5 a8d8
+info depth 6 seldepth 17 multipv 2 score cp 813 nodes 108590 time 49 pv d3d4 e5d4 f3d4 d6d5 e4d5 c6d5
+info depth 6 seldepth 17 multipv 3 score cp 808 nodes 108590 time 49 pv c3a4 b7b5 a4c5 d6c5 c4b3 d8d6
+info depth 6 seldepth 17 multipv 4 score cp 802 nodes 108590 time 49 pv a2a3 b7b5 c4b3 h7h6 g5d2 d8c7
+info depth 6 seldepth 17 multipv 5 score cp 791 nodes 108590 time 49 pv c4b3 h7h6 g5d2 d8c7 a2a3 a8d8
+info depth 7 seldepth 25 multipv 1 score cp 916 nodes 347305 time 171 pv d3d4 e5d4 f3d4 a7a5 d4f5 b7b5 c4b3
+info depth 7 seldepth 25 multipv 2 score cp 817 nodes 347305 time 171 pv a2a4 h7h6 g5f6 d8f6 a4a5 b7b5 a5b6 a7b6
+info depth 7 seldepth 25 multipv 3 score cp 813 nodes 347305 time 171 pv c3a4 b7b5 a4c5 d6c5 c4b3 c5c4 d3c4 d8d1 a1d1 f6e4 c4b5 c6b5
+info depth 7 seldepth 25 multipv 4 score cp 805 nodes 347305 time 171 pv a2a3 b7b5 c4b3 h7h6 g5f6 d8f6 d1e2
+info depth 7 seldepth 25 multipv 5 score cp 802 nodes 347305 time 171 pv d1d2 h7h6 g5f6 d8f6 a2a3 b7b5 c4b3
+info depth 8 seldepth 26 multipv 1 score cp 854 nodes 732787 time 402 pv d3d4 e5d4 f3d4 h7h6 g5h4 a7a5 d4f5 b7b5
+info depth 8 seldepth 26 multipv 2 score cp 814 nodes 732787 time 402 pv d1d2 b7b5 c4b3 d8e7 d3d4 e5d4 f3d4 f6e4 g5e7 e4d2 d4c6 d2f1 e7f8 a8f8 a1f1
+info depth 8 seldepth 26 multipv 3 score cp 813 nodes 732787 time 402 pv c3a4 b7b5 a4c5 d6c5 c4b3 c5c4 d3c4 d8d1 a1d1 f6e4 c4b5 c6b5
+info depth 8 seldepth 26 multipv 4 score cp 812 nodes 732787 time 402 pv a2a4 h7h6 g5f6 d8f6 a4a5 f6f4 d3d4 d6d5
+info depth 8 seldepth 26 multipv 5 score cp 793 nodes 732787 time 402 pv a1c1 b7b5 c4b3 h7h6 g5f6 d8f6 a2a4 a7a6
+info depth 9 seldepth 26 multipv 1 score cp 860 nodes 1389618 time 803 pv d3d4 e5d4 f3d4 h7h6 g5h4 g7g5 h4g3 d6d5 e4d5 c6d5
+info depth 9 seldepth 26 multipv 2 score cp 820 nodes 1389618 time 803 pv a2a4 h7h6 g5f6 d8f6 d1d2 c5d4 a4a5 a8d8 a1d1
+info depth 9 seldepth 26 multipv 3 score cp 814 nodes 1389618 time 803 pv d1d2 b7b5 c4b3 d8e7 d3d4 e5d4 f3d4 f6e4 g5e7 e4d2 d4c6 d2f1 e7f8 a8f8 a1f1
+info depth 9 seldepth 26 multipv 4 score cp 813 nodes 1389618 time 803 pv c3a4 b7b5 a4c5 d6c5 c4b3 c5c4 d3c4 d8d1 a1d1 f6e4 c4b5 c6b5
+info depth 9 seldepth 26 multipv 5 score cp 790 nodes 1389618 time 803 pv a1c1 b7b5 c4b3 h7h6 g5f6 d8f6 a2a3 a8d8 d1e2
+info string adaptive volle_staerke player -860 after -860 accuracy -1 best d3d4 selected d3d4 samples 0 helped 0 adjusts 0
+info depth 9 score cp 860 nodes 1721555 time 1000 pv d3d4 e5d4 f3d4 h7h6 g5h4 g7g5 h4g3 d6d5 e4d5 c6d5
+bestmove d3d4
+> ucinewgame
+> position fen 7k/8/5K2/8/8/8/8/1Q6 b - - 0 1
+> isready
+readyok
+> go depth 3
+info depth 1 seldepth 3 multipv 1 score cp -1349 nodes 15 time 0 pv h8g8 b1g6 g8f8
+info string early move: only legal move
+info string adaptive eroeffnung player 1349 after 1349 accuracy -1 best h8g8 selected h8g8 samples 0 helped 0 adjusts 0
+info depth 1 score cp -1349 nodes 28 time 0 pv h8g8 b1g6 g8f8
+bestmove h8g8
+> setoption name Adaptive value false
+> position startpos
+> weights
+> eval
+> isready
+info string Adaptive off: previous settings restored
+Material.Pawn.Mg = 150   # 0..1600, default 100
+Material.Pawn.Eg = 107   # 0..1600, default 107
+Material.Knight.Mg = 395   # 0..1600, default 395
+Material.Knight.Eg = 377   # 0..1600, default 377
+Material.Bishop.Mg = 405   # 0..1600, default 405
+Material.Bishop.Eg = 400   # 0..1600, default 400
+Material.Rook.Mg = 595   # 0..1600, default 595
+Material.Rook.Eg = 620   # 0..1600, default 620
+Material.Queen.Mg = 1225   # 0..2000, default 1225
+Material.Queen.Eg = 1180   # 0..2000, default 1180
+Pst.PawnMgAdvance = 3   # -40..40, default 3
+Pst.PawnEgAdvance = 6   # -40..40, default 6
+Pst.KnightCenter = 10   # -40..40, default 10
+Pst.KnightRim = -12   # -60..20, default -12
+Pst.BishopCenter = 6   # -40..40, default 6
+Pst.BishopDiagonal = 2   # -40..40, default 2
+Pst.RookRank7 = 0   # -40..60, default 0
+Pst.RookFileCenter = 4   # -40..40, default 4
+Pst.QueenCenter = 3   # -40..40, default 3
+Pst.KingMgShelter = 30   # -40..80, default 22
+Pst.KingMgCenter = -12   # -60..40, default -12
+Pst.KingEgCenter = 12   # -40..60, default 12
+Mobility.Knight = 4   # 0..20, default 4
+Mobility.Bishop = 5   # 0..20, default 5
+Mobility.Rook = 2   # 0..20, default 2
+Mobility.Queen = 1   # 0..20, default 1
+KingSafety.AttackUnits = 100   # 0..400, default 100
+KingSafety.Saturation = 256   # 64..4096, default 256
+KingSafety.ShieldMissing = -35   # -120..0, default -22
+KingSafety.ShieldPawn = 8   # 0..60, default 8
+KingSafety.OpenFileNearKing = -28   # -160..0, default -28
+KingSafety.SemiOpenNearKing = -14   # -160..0, default -14
+KingSafety.TropismN = 12   # 0..60, default 12
+KingSafety.TropismB = 10   # 0..60, default 10
+KingSafety.TropismR = 8   # 0..60, default 8
+KingSafety.TropismQ = 6   # 0..60, default 6
+KingSafety.SafeCheck = 18   # 0..80, default 18
+KingSafety.UncastledMg = -30   # -200..0, default -30
+KingSafety.KingRingAttack = 6   # 0..40, default 6
+Pawns.Doubled = -12   # -120..20, default -12
+Pawns.Isolated = -15   # -120..20, default -15
+Pawns.Backward = -8   # -120..20, default -8
+Pawns.Connected = 4   # 0..60, default 4
+Pawns.PassedMg = 100   # -40..200, default 100
+Pawns.PassedEg = 100   # -40..300, default 100
+Pawns.Candidate = 8   # 0..80, default 8
+Pawns.DoubledVsKing = -18   # -120..20, default -18
+Rooks.OpenFile = 25   # -40..160, default 25
+Rooks.SemiOpenFile = 12   # -40..160, default 12
+Rooks.OnSeventh = 8   # -40..120, default 8
+Rooks.Connected = 10   # 0..80, default 10
+Rooks.Trapped = -40   # -200..0, default -40
+Rooks.OpenFileVsKing = 15   # -40..200, default 30
+Pieces.KnightOutpost = 25   # 0..120, default 25
+Pieces.BishopPair = 30   # 0..120, default 30
+Pieces.BadBishop = -3   # -20..0, default -3
+Pieces.Fianchetto = 12   # 0..80, default 12
+Threats.AttackedByLower = 20   # 0..120, default 20
+Threats.Hanging = 45   # 0..200, default 45
+Threats.Pinned = 15   # 0..120, default 15
+Threats.Discovered = 18   # 0..120, default 18
+Space.PerSafeSquare = 8   # 0..40, default 8
+Initiative.Tempo = 10   # 0..60, default 10
+Initiative.Progress = 12   # 0..80, default 12
+Aggression.KingAttack = 40   # 0..400, default 100
+Aggression.PawnStorm = 0   # 0..400, default 100
+Aggression.Initiative = 30   # 0..400, default 100
+Aggression.SacrificeTolerance = 0   # 0..400, default 100
+Aggression.AvoidQueenTrade = 0   # 0..400, default 100
+Complexity.Weight = 100   # 0..400, default 100
+Drawish.OppositeBishops = 60   # 0..200, default 60
+Drawish.Insufficient = 0   # 0..200, default 0
+Endgame.KingActivity = 100   # 0..400, default 100
+Endgame.PassedKingProximity = 100   # 0..400, default 100
+Group.Material = 120   # 0..400, default 100
+Group.Pst = 100   # 0..400, default 100
+Group.Mobility = 90   # 0..400, default 100
+Group.KingSafety = 200   # 0..400, default 100
+Group.Pawns = 160   # 0..400, default 100
+Group.Rooks = 100   # 0..400, default 100
+Group.Pieces = 100   # 0..400, default 100
+Group.Threats = 110   # 0..400, default 100
+Group.Space = 100   # 0..400, default 100
+Group.Initiative = 100   # 0..400, default 100
+Group.Aggression = 40   # 0..400, default 100
+Group.Complexity = 30   # 0..400, default 100
+Group.Drawish = 130   # 0..400, default 100
+Group.Endgame = 100   # 0..400, default 100
+Misc.Contempt = -25   # -100..100, default 0
+Misc.MoveNoise = 0   # 0..400, default 0
+Elo.KnowledgeFloor = 25   # 0..100, default 25
+info string eval total 10 cp (material 0, pst 0, tempo 10, phase 24)
+info string terms: material=0 pst=0 mobility=0 kingSafety=0 pawns=0 rooks=0 pieces=0 threats=0 space=0 initiative=0 endgame=0 aggression=0 complexity=0
+readyok
+> go depth 7
+info depth 1 seldepth 1 score cp 35 nodes 40 nps 40000 hashfull 0 time 0 pv b2b4
+info depth 2 seldepth 8 score cp -1 nodes 1069 nps 1069000 hashfull 8 time 1 pv d2d4 b7b6
+bestmove g1h3
+> setoption name Adaptive value true
+> ucinewgame
+> position fen 7k/6Q1/5K2/8/8/8/8/8 b - - 0 1
+> isready
+info string Adaptive on: full strength, five candidates, fixed attack profile, hash 32768 KiB, threads 4
+readyok
+> go movetime 20
+bestmove 0000
+> quit

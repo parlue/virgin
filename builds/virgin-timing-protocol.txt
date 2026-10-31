@@ -1,0 +1,306 @@
+> uci
+id name Virgin 0.7.1
+id author Dirk Sommerfeld / built with Cline
+option name Hash type spin default 32 min 1 max 4096
+option name Threads type spin default 4 min 0 max 64
+option name Adaptive type check default false
+option name Ponder type check default false
+option name UCI_LimitStrength type check default false
+option name UCI_Elo type spin default 2800 min 700 max 3000
+option name Style type combo default Ausgeglichen var Furchtsam var Vorsichtig var Ausgeglichen var Angriffslustig var Stier
+option name Boldness type spin default 30 min 10 max 50
+option name Bot type string default <empty>
+option name WeightsFile type string default <empty>
+option name Clear Hash type button
+option name ReloadWeights type button
+option name ResetWeights type button
+option name ShowWeights type button
+option name ListBots type button
+option name Material.Pawn.Mg type spin default 100 min 0 max 1600
+option name Material.Pawn.Eg type spin default 107 min 0 max 1600
+option name Material.Knight.Mg type spin default 395 min 0 max 1600
+option name Material.Knight.Eg type spin default 377 min 0 max 1600
+option name Material.Bishop.Mg type spin default 405 min 0 max 1600
+option name Material.Bishop.Eg type spin default 400 min 0 max 1600
+option name Material.Rook.Mg type spin default 595 min 0 max 1600
+option name Material.Rook.Eg type spin default 620 min 0 max 1600
+option name Material.Queen.Mg type spin default 1225 min 0 max 2000
+option name Material.Queen.Eg type spin default 1180 min 0 max 2000
+option name Pst.PawnMgAdvance type spin default 3 min -40 max 40
+option name Pst.PawnEgAdvance type spin default 6 min -40 max 40
+option name Pst.KnightCenter type spin default 10 min -40 max 40
+option name Pst.KnightRim type spin default -12 min -60 max 20
+option name Pst.BishopCenter type spin default 6 min -40 max 40
+option name Pst.BishopDiagonal type spin default 2 min -40 max 40
+option name Pst.RookRank7 type spin default 0 min -40 max 60
+option name Pst.RookFileCenter type spin default 4 min -40 max 40
+option name Pst.QueenCenter type spin default 3 min -40 max 40
+option name Pst.KingMgShelter type spin default 22 min -40 max 80
+option name Pst.KingMgCenter type spin default -12 min -60 max 40
+option name Pst.KingEgCenter type spin default 12 min -40 max 60
+option name Mobility.Knight type spin default 4 min 0 max 20
+option name Mobility.Bishop type spin default 5 min 0 max 20
+option name Mobility.Rook type spin default 2 min 0 max 20
+option name Mobility.Queen type spin default 1 min 0 max 20
+option name KingSafety.AttackUnits type spin default 100 min 0 max 400
+option name KingSafety.Saturation type spin default 256 min 64 max 4096
+option name KingSafety.ShieldMissing type spin default -22 min -120 max 0
+option name KingSafety.ShieldPawn type spin default 8 min 0 max 60
+option name KingSafety.OpenFileNearKing type spin default -28 min -160 max 0
+option name KingSafety.SemiOpenNearKing type spin default -14 min -160 max 0
+option name KingSafety.TropismN type spin default 12 min 0 max 60
+option name KingSafety.TropismB type spin default 10 min 0 max 60
+option name KingSafety.TropismR type spin default 8 min 0 max 60
+option name KingSafety.TropismQ type spin default 6 min 0 max 60
+option name KingSafety.SafeCheck type spin default 18 min 0 max 80
+option name KingSafety.UncastledMg type spin default -30 min -200 max 0
+option name KingSafety.KingRingAttack type spin default 6 min 0 max 40
+option name Pawns.Doubled type spin default -12 min -120 max 20
+option name Pawns.Isolated type spin default -15 min -120 max 20
+option name Pawns.Backward type spin default -8 min -120 max 20
+option name Pawns.Connected type spin default 4 min 0 max 60
+option name Pawns.PassedMg type spin default 100 min -40 max 200
+option name Pawns.PassedEg type spin default 100 min -40 max 300
+option name Pawns.Candidate type spin default 8 min 0 max 80
+option name Pawns.DoubledVsKing type spin default -18 min -120 max 20
+option name Rooks.OpenFile type spin default 25 min -40 max 160
+option name Rooks.SemiOpenFile type spin default 12 min -40 max 160
+option name Rooks.OnSeventh type spin default 8 min -40 max 120
+option name Rooks.Connected type spin default 10 min 0 max 80
+option name Rooks.Trapped type spin default -40 min -200 max 0
+option name Rooks.OpenFileVsKing type spin default 30 min -40 max 200
+option name Pieces.KnightOutpost type spin default 25 min 0 max 120
+option name Pieces.BishopPair type spin default 30 min 0 max 120
+option name Pieces.BadBishop type spin default -3 min -20 max 0
+option name Pieces.Fianchetto type spin default 12 min 0 max 80
+option name Threats.AttackedByLower type spin default 20 min 0 max 120
+option name Threats.Hanging type spin default 45 min 0 max 200
+option name Threats.Pinned type spin default 15 min 0 max 120
+option name Threats.Discovered type spin default 18 min 0 max 120
+option name Space.PerSafeSquare type spin default 8 min 0 max 40
+option name Initiative.Tempo type spin default 10 min 0 max 60
+option name Initiative.Progress type spin default 12 min 0 max 80
+option name Aggression.KingAttack type spin default 100 min 0 max 400
+option name Aggression.PawnStorm type spin default 100 min 0 max 400
+option name Aggression.Initiative type spin default 100 min 0 max 400
+option name Aggression.SacrificeTolerance type spin default 100 min 0 max 400
+option name Aggression.AvoidQueenTrade type spin default 100 min 0 max 400
+option name Complexity.Weight type spin default 100 min 0 max 400
+option name Drawish.OppositeBishops type spin default 60 min 0 max 200
+option name Drawish.Insufficient type spin default 0 min 0 max 200
+option name Endgame.KingActivity type spin default 100 min 0 max 400
+option name Endgame.PassedKingProximity type spin default 100 min 0 max 400
+option name Group.Material type spin default 100 min 0 max 400
+option name Group.Pst type spin default 100 min 0 max 400
+option name Group.Mobility type spin default 100 min 0 max 400
+option name Group.KingSafety type spin default 100 min 0 max 400
+option name Group.Pawns type spin default 100 min 0 max 400
+option name Group.Rooks type spin default 100 min 0 max 400
+option name Group.Pieces type spin default 100 min 0 max 400
+option name Group.Threats type spin default 100 min 0 max 400
+option name Group.Space type spin default 100 min 0 max 400
+option name Group.Initiative type spin default 100 min 0 max 400
+option name Group.Aggression type spin default 100 min 0 max 400
+option name Group.Complexity type spin default 100 min 0 max 400
+option name Group.Drawish type spin default 100 min 0 max 400
+option name Group.Endgame type spin default 100 min 0 max 400
+option name Misc.Contempt type spin default 0 min -100 max 100
+option name Misc.MoveNoise type spin default 0 min 0 max 400
+option name Elo.KnowledgeFloor type spin default 25 min 0 max 100
+uciok
+> setoption name Adaptive value false
+> ucinewgame
+> position startpos moves e2e4
+> isready
+readyok
+> go wtime 7380000 btime 7200000 winc 0 binc 0
+info depth 1 seldepth 6 score cp -10 nodes 193 nps 193000 hashfull 0 time 0 pv e7e5
+info depth 2 seldepth 7 score cp -72 nodes 895 nps 895000 hashfull 0 time 1 pv d7d5 b1c3
+info depth 3 seldepth 9 score cp -14 nodes 1816 nps 1816000 hashfull 1 time 1 pv d7d5 b1c3 g8f6
+info depth 4 seldepth 12 score cp -45 nodes 5783 nps 1156600 hashfull 2 time 5 pv d7d5 d2d4 d5e4 f1c4
+info depth 5 seldepth 12 score cp -19 nodes 9236 nps 1539333 hashfull 3 time 6 pv d7d5 e4d5 g8f6 f1b5 c7c6 d5c6 b8c6
+info depth 6 seldepth 13 score cp -45 nodes 24143 nps 1857153 hashfull 7 time 13 pv d7d5 e4e5 c8f5 d2d4 e7e6 b1c3
+info depth 7 seldepth 18 score cp -17 nodes 41090 nps 1867727 hashfull 13 time 22 pv d7d5 e4e5 c8f5 d2d4 e7e6 f1d3 b8c6 d3f5 e6f5
+info depth 8 seldepth 20 score cp -46 nodes 81615 nps 1665612 hashfull 22 time 49 pv d7d5 e4e5 c7c5 f1b5 b8c6 d2d4 d8a5 b1c3 c8d7 d4c5
+info depth 9 seldepth 20 score cp -44 nodes 133625 nps 1518465 hashfull 35 time 88 pv d7d5 e4e5 c7c5 g1f3 b8c6 b1c3 c8f5 d2d4 c5c4
+info depth 10 seldepth 30 score cp -63 nodes 268248 nps 1354787 hashfull 70 time 198 pv d7d5 e4e5 c7c5 g1f3 b8c6 b1c3 c8e6 f1b5 a7a6 b5c6 b7c6
+info depth 11 seldepth 30 score cp -55 nodes 449321 nps 1211107 hashfull 112 time 371 pv d7d5 e4e5 c7c5 f1b5 c8d7 b5d7 d8d7 g1f3 b8c6 e1g1 d7f5 b1c3 c6e5 c3d5 e5f3 d1f3
+info depth 12 seldepth 30 score cp -65 nodes 1245868 nps 1173133 hashfull 329 time 1062 pv e7e5 g1f3 g8f6 f1c4 f8c5 e1g1 e8g8 d2d4 d7d5 d4e5 d5c4 d1d8 f8d8 e5f6 g7f6
+info depth 13 seldepth 30 score cp -54 nodes 1683621 nps 1174073 hashfull 422 time 1434 pv e7e5 g1f3 g8f6 f1c4 f6e4 b1c3 e4f6 d1e2 d7d5 e2e5 c8e6 c4b5 c7c6
+info depth 14 seldepth 36 score cp -87 nodes 3497578 nps 1175261 hashfull 763 time 2976 pv e7e5 g1f3 g8f6 d2d4 f6e4 f1d3 d7d5 f3e5 b8d7 e5f7 e8f7 d1h5 f7e6 e1g1
+bestmove e7e5
+> setoption name Adaptive value true
+> ucinewgame
+> position startpos moves e2e4
+> isready
+info string Adaptive on: full strength, five candidates, fixed attack profile, hash 32768 KiB, threads 4
+readyok
+> go wtime 7380000 btime 7200000 winc 0 binc 0
+info depth 1 seldepth 6 multipv 1 score cp -10 nodes 384 time 0 pv e7e5
+info depth 1 seldepth 6 multipv 2 score cp -18 nodes 384 time 0 pv d7d5
+info depth 1 seldepth 6 multipv 3 score cp -22 nodes 384 time 0 pv e7e6
+info depth 1 seldepth 6 multipv 4 score cp -35 nodes 384 time 0 pv b8c6
+info depth 1 seldepth 6 multipv 5 score cp -35 nodes 384 time 0 pv g8f6
+info depth 2 seldepth 7 multipv 1 score cp -72 nodes 2023 time 1 pv d7d5 b1c3
+info depth 2 seldepth 7 multipv 2 score cp -90 nodes 2023 time 1 pv e7e5 d2d4
+info depth 2 seldepth 7 multipv 3 score cp -90 nodes 2023 time 1 pv g8f6 b1c3
+info depth 2 seldepth 7 multipv 4 score cp -99 nodes 2023 time 1 pv e7e6 d2d4
+info depth 2 seldepth 7 multipv 5 score cp -126 nodes 2023 time 1 pv d7d6 d2d4
+info depth 3 seldepth 9 multipv 1 score cp -14 nodes 5559 time 3 pv d7d5 b1c3 g8f6
+info depth 3 seldepth 9 multipv 2 score cp -17 nodes 5559 time 3 pv g8f6 b1c3 e7e5
+info depth 3 seldepth 9 multipv 3 score cp -28 nodes 5559 time 3 pv e7e5 d2d4 d7d5 d4e5 d5e4 d1d8 e8d8
+info depth 3 seldepth 9 multipv 4 score cp -44 nodes 5559 time 3 pv e7e6 d2d4 b8c6
+info depth 3 seldepth 9 multipv 5 score cp -68 nodes 5559 time 3 pv d7d6 d2d4 g8f6
+info depth 4 seldepth 11 multipv 1 score cp -43 nodes 14529 time 8 pv d7d5 b1c3 g8f6 f1d3
+info depth 4 seldepth 11 multipv 2 score cp -95 nodes 14529 time 8 pv e7e5 b1c3 f8c5 c3d5
+info depth 4 seldepth 11 multipv 3 score cp -100 nodes 14529 time 8 pv b8c6 b1c3 e7e6 d2d4
+info depth 4 seldepth 11 multipv 4 score cp -101 nodes 14529 time 8 pv g8f6 e4e5 f6e4 b1c3
+info depth 4 seldepth 11 multipv 5 score cp -102 nodes 14529 time 8 pv e7e6 d2d4 b8c6 c1f4
+info depth 5 seldepth 16 multipv 1 score cp -18 nodes 40156 time 27 pv d7d5 e4d5 g8f6 f1b5 c7c6 d5c6 b7c6
+info depth 5 seldepth 16 multipv 2 score cp -23 nodes 40156 time 27 pv e7e6 d2d4 g8f6 f1d3 b8c6
+info depth 5 seldepth 16 multipv 3 score cp -28 nodes 40156 time 27 pv g8f6 e4e5 f6d5 d2d4 e7e6
+info depth 5 seldepth 16 multipv 4 score cp -40 nodes 40156 time 27 pv e7e5 b1c3 f8c5 c3d5 b8c6
+info depth 5 seldepth 16 multipv 5 score cp -42 nodes 40156 time 27 pv b8c6 b1c3 g8f6 d2d4 d7d5
+info depth 6 seldepth 18 multipv 1 score cp -33 nodes 91268 time 62 pv d7d5 e4e5 c8f5 d2d4 b8c6 c1g5
+info depth 6 seldepth 18 multipv 2 score cp -61 nodes 91268 time 62 pv e7e6 d2d4 d7d5 b1c3 f8b4 f1d3
+info depth 6 seldepth 18 multipv 3 score cp -74 nodes 91268 time 62 pv b8c6 b1c3 g8f6 f1c4 e7e5 g1f3
+info depth 6 seldepth 18 multipv 4 score cp -86 nodes 91268 time 62 pv e7e5 g1f3 g8f6 b1c3 d7d5 e4d5
+info depth 6 seldepth 18 multipv 5 score cp -90 nodes 91268 time 62 pv c7c6 d2d4 d7d5 e4e5 c8f5 f1d3 f5d3 d1d3
+info depth 7 seldepth 22 multipv 1 score cp -20 nodes 163365 time 114 pv d7d5 e4d5 d8d5 b1c3 d5e6 d1e2 g8f6 d2d4
+info depth 7 seldepth 22 multipv 2 score cp -51 nodes 163365 time 114 pv c7c6 d2d4 d7d5 e4e5 c8f5 f1d3 g8h6
+info depth 7 seldepth 22 multipv 3 score cp -56 nodes 163365 time 114 pv b8c6 b1c3 e7e6 d2d4 f8b4 a2a3 b4c3 b2c3
+info depth 7 seldepth 22 multipv 4 score cp -56 nodes 163365 time 114 pv e7e6 d2d4 b8c6 b1c3 f8b4 a2a3 b4c3 b2c3
+info depth 7 seldepth 22 multipv 5 score cp -57 nodes 163365 time 114 pv e7e5 g1f3 g8f6 b1c3 d7d5 e4d5 f8d6
+info depth 8 seldepth 22 multipv 1 score cp -51 nodes 388540 time 273 pv d7d5 e4d5 g8f6 d2d4 c7c6 b1c3 d8a5 c1d2 c6d5
+info depth 8 seldepth 22 multipv 2 score cp -69 nodes 388540 time 273 pv b8c6 b1c3 e7e6 g1f3 d7d5 f1b5 a7a6 b5c6 b7c6
+info depth 8 seldepth 22 multipv 3 score cp -74 nodes 388540 time 273 pv e7e6 g1f3 d7d5 e4d5 g8f6 d5e6 c8e6 d2d4
+info depth 8 seldepth 22 multipv 4 score cp -90 nodes 388540 time 273 pv c7c6 d2d4 d7d5 e4e5 c8f5 f1d3 f5d3 d1d3
+info depth 8 seldepth 22 multipv 5 score cp -109 nodes 388540 time 273 pv g7g6 b1c3 c7c6 g1f3 d7d5 d2d4 g8f6 f1d3 d5e4 c3e4 f6e4 d3e4
+info depth 9 seldepth 22 multipv 1 score cp -53 nodes 652298 time 465 pv e7e5 g1f3 g8f6 b1c3 f8b4 f1c4 b8c6 e1g1 e8g8
+info depth 9 seldepth 22 multipv 2 score cp -54 nodes 652298 time 465 pv b8c6 d2d4 e7e6 g1f3 g8f6 d4d5 e6d5 e4d5 c6b4
+info depth 9 seldepth 22 multipv 3 score cp -54 nodes 652298 time 465 pv e7e6 d2d4 b8c6 g1f3 g8f6 d4d5 e6d5 e4d5 c6b4
+info depth 9 seldepth 22 multipv 4 score cp -64 nodes 652298 time 465 pv d7d5 e4d5 g8f6 d2d4 f6d5 c2c4 d5f6 g1f3 b8c6
+info depth 9 seldepth 22 multipv 5 score cp -71 nodes 652298 time 465 pv c7c6 d2d4 d7d5 e4e5 c8f5 g1f3 e7e6 f1d3 f5d3 d1d3
+info depth 10 seldepth 29 multipv 1 score cp -43 nodes 1581828 time 1155 pv d7d5 e4e5 d5d4 g1f3 d8d5 b1a3 c8f5 f1d3 f5d3 c2d3
+info depth 10 seldepth 29 multipv 2 score cp -72 nodes 1581828 time 1155 pv e7e5 g1f3 g8f6 d2d4 f6e4 f1d3 d7d5 d3e4 d5e4 f3e5
+info depth 10 seldepth 29 multipv 3 score cp -79 nodes 1581828 time 1155 pv b8c6 d2d4 d7d5 e4d5 d8d5 g1f3 g8f6 b1c3 d5e6 c1e3
+info depth 10 seldepth 29 multipv 4 score cp -95 nodes 1581828 time 1155 pv c7c6 d2d4 g7g6 b1c3 d7d5 e4e5 f8g7 g1f3 c8f5 c1f4
+info depth 10 seldepth 29 multipv 5 score cp -96 nodes 1581828 time 1155 pv e7e6 d2d4 b8c6 g1f3 g8f6 e4e5 f6d5 f1d3 f8b4 c2c3
+info depth 11 seldepth 29 multipv 1 score cp -68 nodes 3005929 time 2297 pv b8c6 d2d4 e7e6 g1f3 d7d5 e4d5 d8d5 b1c3 d5a5 c1d2 g8f6
+info depth 11 seldepth 29 multipv 2 score cp -71 nodes 3005929 time 2297 pv e7e6 d2d4 g8f6 e4e5 f6e4 f1d3 d7d5 e5d6 e4d6 b1c3 d6f5
+info depth 11 seldepth 29 multipv 3 score cp -72 nodes 3005929 time 2297 pv d7d5 e4d5 e7e6 d5e6 c8e6 d2d4 c7c6 g1f3 f8d6 f3e5 g8f6
+info depth 11 seldepth 29 multipv 4 score cp -72 nodes 3005929 time 2297 pv g7g6 b1c3 f8g7 d2d4 d7d5 e4e5 c7c6 g1f3 c8e6 c1f4 d8a5
+info depth 11 seldepth 29 multipv 5 score cp -76 nodes 3005929 time 2297 pv e7e5 d2d4 e5d4 g1f3 f8c5 c2c3 d4c3 b1c3 d7d6 c3d5 b8c6
+info string adaptive eroeffnung player 68 after 68 accuracy -1 best b8c6 selected b8c6 samples 0 helped 0 adjusts 0
+info depth 11 score cp -68 nodes 3006435 time 2297 pv b8c6 d2d4 e7e6 g1f3 d7d5 e4d5 d8d5 b1c3 d5a5 c1d2 g8f6
+bestmove b8c6
+> setoption name Adaptive value false
+> ucinewgame
+> position startpos moves e2e4
+> isready
+info string Adaptive off: previous settings restored
+readyok
+> go
+info depth 1 seldepth 6 score cp -10 nodes 130 nps 130000 hashfull 0 time 0 pv e7e5
+info depth 2 seldepth 7 score cp -72 nodes 1096 nps 1096000 hashfull 0 time 1 pv d7d5 b1c3
+info depth 3 seldepth 9 score cp -14 nodes 2538 nps 2538000 hashfull 1 time 1 pv d7d5 b1c3 g8f6
+info depth 4 seldepth 12 score cp -43 nodes 10317 nps 2063400 hashfull 1 time 5 pv d7d5 b1c3 g8f6 f1d3
+info depth 5 seldepth 16 score cp -19 nodes 18537 nps 1685181 hashfull 2 time 11 pv d7d5 e4d5 g8f6 f1b5 c7c6 d5c6 b8c6
+info depth 6 seldepth 16 score cp -45 nodes 34906 nps 1662190 hashfull 4 time 21 pv d7d5 e4e5 c8f5 d2d4 e7e6 b1c3
+info depth 7 seldepth 20 score cp -10 nodes 59485 nps 1699571 hashfull 9 time 35 pv d7d5 e4e5 b8c6 d2d4 c8f5 f1b5 e7e6
+info depth 8 seldepth 20 score cp -51 nodes 82045 nps 1745638 hashfull 15 time 47 pv d7d5 e4e5 b8c6 d2d4 c8f5 f1b5 a7a6 b5c6 b7c6
+info depth 9 seldepth 20 score cp -20 nodes 137053 nps 1671378 hashfull 23 time 82 pv d7d5 e4e5 c8f5 d2d4 e7e6 g1f3 b8c6 f1d3 f5d3 d1d3
+info depth 10 seldepth 22 score cp -75 nodes 375702 nps 1428524 hashfull 75 time 263 pv d7d5 e4e5 c8f5 g1f3 b8c6 d2d4 c6b4 f1d3 b4d3 c2d3
+info depth 11 seldepth 29 score cp -59 nodes 541920 nps 1418638 hashfull 115 time 382 pv e7e5 b1c3 b8c6 g1f3 f8b4 f1c4 g8f6 e1g1 b4c3 d2c3 f6e4
+info depth 12 seldepth 30 score cp -78 nodes 1331217 nps 1358384 hashfull 306 time 980 pv e7e5 f1c4 g8f6 g1f3 d7d5 e4d5 e5e4 f3e5 d8e7 c4b5 c8d7 e5d7 b8d7
+bestmove e7e5
+> ucinewgame
+> position startpos moves e2e4
+> isready
+readyok
+> go wtime 0 btime 0
+info depth 1 seldepth 1 score cp -61 nodes 84 nps 84000 hashfull 0 time 0 pv b7b6
+info depth 2 seldepth 6 score cp -72 nodes 996 nps 996000 hashfull 0 time 0 pv d7d5 b1c3
+info depth 3 seldepth 9 score cp -15 nodes 1901 nps 1901000 hashfull 0 time 0 pv d7d5 e4e5 d5d4
+info depth 4 seldepth 9 score cp -62 nodes 3359 nps 3359000 hashfull 0 time 0 pv d7d5 e4e5 d5d4 g1f3
+bestmove d7d5
+> ucinewgame
+> position fen 7k/8/5K2/8/8/8/8/1Q6 b - - 0 1
+> isready
+readyok
+> go movetime 60000
+info depth 1 seldepth 3 score cp -1347 nodes 15 nps 15000 hashfull 0 time 0 pv h8g8 b1g6 g8f8
+info string early move: only legal move
+bestmove h8g8
+> ucinewgame
+> position fen 6k1/5ppp/8/8/8/8/5PPP/R5K1 w - - 0 1
+> isready
+readyok
+> go infinite
+info depth 1 seldepth 1 score cp 30999 nodes 108 nps 108000 hashfull 0 time 0 pv a1a8
+info depth 2 seldepth 1 score cp 30999 nodes 348 nps 348000 hashfull 0 time 0 pv a1a8
+info depth 3 seldepth 1 score cp 30999 nodes 642 nps 642000 hashfull 0 time 0 pv a1a8
+info depth 4 seldepth 1 score cp 30999 nodes 1316 nps 1316000 hashfull 0 time 0 pv a1a8
+info depth 5 seldepth 1 score cp 30999 nodes 2956 nps 2956000 hashfull 0 time 0 pv a1a8
+info depth 6 seldepth 1 score cp 30999 nodes 3876 nps 3876000 hashfull 0 time 0 pv a1a8
+info depth 7 seldepth 1 score cp 30999 nodes 4096 nps 4096000 hashfull 0 time 0 pv a1a8
+info depth 8 seldepth 1 score cp 30999 nodes 4136 nps 4136000 hashfull 0 time 1 pv a1a8
+info depth 9 seldepth 1 score cp 30999 nodes 4156 nps 4156000 hashfull 0 time 1 pv a1a8
+info depth 10 seldepth 1 score cp 30999 nodes 4176 nps 4176000 hashfull 0 time 1 pv a1a8
+info depth 11 seldepth 1 score cp 30999 nodes 4196 nps 4196000 hashfull 0 time 1 pv a1a8
+info depth 12 seldepth 1 score cp 30999 nodes 4216 nps 4216000 hashfull 0 time 1 pv a1a8
+info depth 13 seldepth 1 score cp 30999 nodes 4236 nps 4236000 hashfull 0 time 1 pv a1a8
+info depth 14 seldepth 1 score cp 30999 nodes 4256 nps 4256000 hashfull 0 time 1 pv a1a8
+info depth 15 seldepth 1 score cp 30999 nodes 4276 nps 4276000 hashfull 0 time 1 pv a1a8
+info depth 16 seldepth 1 score cp 30999 nodes 4296 nps 4296000 hashfull 0 time 1 pv a1a8
+info depth 17 seldepth 1 score cp 30999 nodes 4316 nps 4316000 hashfull 0 time 1 pv a1a8
+info depth 18 seldepth 1 score cp 30999 nodes 4336 nps 4336000 hashfull 0 time 1 pv a1a8
+info depth 19 seldepth 1 score cp 30999 nodes 4356 nps 4356000 hashfull 0 time 1 pv a1a8
+info depth 20 seldepth 1 score cp 30999 nodes 4376 nps 4376000 hashfull 0 time 1 pv a1a8
+info depth 21 seldepth 1 score cp 30999 nodes 4396 nps 4396000 hashfull 0 time 1 pv a1a8
+info depth 22 seldepth 1 score cp 30999 nodes 4416 nps 4416000 hashfull 0 time 1 pv a1a8
+info depth 23 seldepth 1 score cp 30999 nodes 4436 nps 4436000 hashfull 0 time 1 pv a1a8
+info depth 24 seldepth 1 score cp 30999 nodes 4456 nps 4456000 hashfull 0 time 1 pv a1a8
+info depth 25 seldepth 1 score cp 30999 nodes 4476 nps 2238000 hashfull 0 time 2 pv a1a8
+info depth 26 seldepth 1 score cp 30999 nodes 4496 nps 2248000 hashfull 0 time 2 pv a1a8
+info depth 27 seldepth 1 score cp 30999 nodes 4516 nps 2258000 hashfull 0 time 2 pv a1a8
+info depth 28 seldepth 1 score cp 30999 nodes 4536 nps 2268000 hashfull 0 time 2 pv a1a8
+info depth 29 seldepth 1 score cp 30999 nodes 4556 nps 2278000 hashfull 0 time 2 pv a1a8
+info depth 30 seldepth 1 score cp 30999 nodes 4576 nps 2288000 hashfull 0 time 2 pv a1a8
+info depth 31 seldepth 1 score cp 30999 nodes 4596 nps 2298000 hashfull 0 time 2 pv a1a8
+info depth 32 seldepth 1 score cp 30999 nodes 4616 nps 2308000 hashfull 0 time 2 pv a1a8
+info depth 33 seldepth 1 score cp 30999 nodes 4636 nps 2318000 hashfull 0 time 2 pv a1a8
+info depth 34 seldepth 1 score cp 30999 nodes 4656 nps 2328000 hashfull 0 time 2 pv a1a8
+info depth 35 seldepth 1 score cp 30999 nodes 4676 nps 2338000 hashfull 0 time 2 pv a1a8
+info depth 36 seldepth 1 score cp 30999 nodes 4696 nps 2348000 hashfull 0 time 2 pv a1a8
+info depth 37 seldepth 1 score cp 30999 nodes 4716 nps 2358000 hashfull 0 time 2 pv a1a8
+info depth 38 seldepth 1 score cp 30999 nodes 4736 nps 2368000 hashfull 0 time 2 pv a1a8
+info depth 39 seldepth 1 score cp 30999 nodes 4756 nps 2378000 hashfull 0 time 2 pv a1a8
+info depth 40 seldepth 1 score cp 30999 nodes 4776 nps 2388000 hashfull 0 time 2 pv a1a8
+info depth 41 seldepth 1 score cp 30999 nodes 4796 nps 2398000 hashfull 0 time 2 pv a1a8
+info depth 42 seldepth 1 score cp 30999 nodes 4816 nps 2408000 hashfull 0 time 2 pv a1a8
+info depth 43 seldepth 1 score cp 30999 nodes 4836 nps 2418000 hashfull 0 time 2 pv a1a8
+info depth 44 seldepth 1 score cp 30999 nodes 4856 nps 2428000 hashfull 0 time 2 pv a1a8
+info depth 45 seldepth 1 score cp 30999 nodes 4876 nps 2438000 hashfull 0 time 2 pv a1a8
+info depth 46 seldepth 1 score cp 30999 nodes 4896 nps 2448000 hashfull 0 time 2 pv a1a8
+info depth 47 seldepth 1 score cp 30999 nodes 4916 nps 2458000 hashfull 0 time 2 pv a1a8
+info depth 48 seldepth 1 score cp 30999 nodes 4936 nps 2468000 hashfull 0 time 2 pv a1a8
+info depth 49 seldepth 1 score cp 30999 nodes 4956 nps 2478000 hashfull 0 time 2 pv a1a8
+info depth 50 seldepth 1 score cp 30999 nodes 4976 nps 2488000 hashfull 0 time 2 pv a1a8
+info depth 51 seldepth 1 score cp 30999 nodes 4996 nps 2498000 hashfull 0 time 2 pv a1a8
+info depth 52 seldepth 1 score cp 30999 nodes 5016 nps 1672000 hashfull 0 time 3 pv a1a8
+info depth 53 seldepth 1 score cp 30999 nodes 5036 nps 1678666 hashfull 0 time 3 pv a1a8
+info depth 54 seldepth 1 score cp 30999 nodes 5056 nps 1685333 hashfull 0 time 3 pv a1a8
+info depth 55 seldepth 1 score cp 30999 nodes 5076 nps 1692000 hashfull 0 time 3 pv a1a8
+info depth 56 seldepth 1 score cp 30999 nodes 5096 nps 1698666 hashfull 0 time 3 pv a1a8
+info depth 57 seldepth 1 score cp 30999 nodes 5116 nps 1705333 hashfull 0 time 3 pv a1a8
+info depth 58 seldepth 1 score cp 30999 nodes 5136 nps 1712000 hashfull 0 time 3 pv a1a8
+info depth 59 seldepth 1 score cp 30999 nodes 5156 nps 1718666 hashfull 0 time 3 pv a1a8
+info depth 60 seldepth 1 score cp 30999 nodes 5176 nps 1725333 hashfull 0 time 3 pv a1a8
+info depth 61 seldepth 1 score cp 30999 nodes 5196 nps 1732000 hashfull 0 time 3 pv a1a8
+info depth 62 seldepth 1 score cp 30999 nodes 5216 nps 1738666 hashfull 0 time 3 pv a1a8
+info depth 63 seldepth 1 score cp 30999 nodes 5236 nps 1745333 hashfull 0 time 3 pv a1a8
+info depth 64 seldepth 1 score cp 30999 nodes 5256 nps 1752000 hashfull 0 time 3 pv a1a8
+> stop
+bestmove a1a8
+> quit
