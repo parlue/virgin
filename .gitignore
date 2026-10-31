@@ -9,3 +9,6 @@ __pycache__/
 
 # tuned adaptive parameters are not published
 src/adaptive_params.h
+
+# ready-made programs in builds/ are meant to be committed
+!builds/*.exe
