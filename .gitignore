@@ -1,0 +1,11 @@
+build/
+reports/
+*.exe
+*.obj
+*.o
+*.pdb
+*.log
+__pycache__/
+
+# tuned adaptive parameters are not published
+src/adaptive_params.h
