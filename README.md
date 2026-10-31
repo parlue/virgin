@@ -36,7 +36,7 @@ Style changes the evaluation weights (king attack, pawn storm, initiative, sacri
 setoption name Bot value v1200-stier
 ```
 
-Bot ids have the form `v<elo>-<style>`, for example `v700-furchtsam`, `v1500-angriffslustig` or `v2800-ausgeglichen`. The full catalogue is in `data/bots.json` (for apps) and `data/bots.txt`. `virgin --list-bots` prints it.
+Bot ids have the form `v<elo>-<style>`, for example `v700-furchtsam`, `v1500-angriffslustig` or `v2800-ausgeglichen`. The full catalogue is in `data/bots.txt`. `virgin --list-bots` prints it, and `virgin --gen-data` also writes it as `data/bots.json` for apps.
 
 ### 2. Combine strength and style yourself
 
