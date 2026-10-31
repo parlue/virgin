@@ -7,5 +7,6 @@ Put the ready-to-run programs here, one file per platform and version:
   virgin-<version>-arm64-v8a    Android, 64-bit ARM
   virgin-<version>-armeabi-v7a  Android, 32-bit ARM
   virgin-<version>-x86_64       Android, x86_64
+  esp32/                        ESP32-S3 build
 
 The source is built with build_win.ps1 and build_android.ps1 (see README.md).
