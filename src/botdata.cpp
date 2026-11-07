@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cctype>
 #include <cstdio>
 #include <fstream>
 #include <sstream>
@@ -14,7 +15,7 @@
 namespace {
 
 const std::vector<StyleDef> g_styles = {
-    {"furchtsam", 1, "Furchtsam", "Sicherheit zuerst, meidet Schaerfe, nimmt Remis an",
+    {"fortress", 1, "Fortress", "Sicherheit zuerst, meidet Schaerfe, nimmt Remis an",
      "defensive,solid,drawish",
      {
          {"Misc.Contempt", -25},
@@ -35,7 +36,7 @@ const std::vector<StyleDef> g_styles = {
          {"KingSafety.ShieldMissing", -35},
          {"Pst.KingMgShelter", 30},
      }},
-    {"vorsichtig", 2, "Vorsichtig", "Solide und positionell, geringes Risiko",
+    {"stone", 2, "Stone", "Solide und positionell, geringes Risiko",
      "solid,positional",
      {
          {"Misc.Contempt", -5},
@@ -54,8 +55,8 @@ const std::vector<StyleDef> g_styles = {
          {"Aggression.AvoidQueenTrade", 50},
          {"Rooks.OpenFileVsKing", 24},
      }},
-    {"ausgeglichen", 3, "Ausgeglichen", "Referenzstil, alle Gewichte auf Standard", "balanced", {}},
-    {"angriffslustig", 4, "Angriffslustig", "Sucht den Koenigsangriff, meidet Damentausch",
+    {"normal", 3, "Normal", "Referenzstil, alle Gewichte auf Standard", "balanced", {}},
+    {"fire", 4, "Fire", "Sucht den Koenigsangriff, meidet Damentausch",
      "attacking,initiative",
      {
          {"Misc.Contempt", 15},
@@ -74,7 +75,7 @@ const std::vector<StyleDef> g_styles = {
          {"Aggression.AvoidQueenTrade", 110},
          {"Rooks.OpenFileVsKing", 42},
      }},
-    {"stier", 5, "Stier", "Tollkuehn: Opfer, Bauernsturm, Koenig jagt Koenig",
+    {"thunder", 5, "Thunder", "Tollkuehn: Opfer, Bauernsturm, Koenig jagt Koenig",
      "bold,sacrificial,gambit",
      {
          {"Misc.Contempt", 45},
@@ -175,9 +176,14 @@ std::string botId(int elo, const std::string& styleId) {
 }
 
 const StyleDef* findStyle(const std::string& idOrName) {
-    for (const StyleDef& s : g_styles)
-        if (idOrName == s.id || idOrName == s.name)
-            return &s;
+    std::string key = idOrName;
+    std::transform(key.begin(), key.end(), key.begin(),
+                   [](unsigned char c) { return char(std::tolower(c)); });
+    // Keep saved UCI settings and v<elo>-<oldstyle> bot IDs compatible.
+    static const char* legacy[] = {"furchtsam", "vorsichtig", "ausgeglichen", "angriffslustig", "stier"};
+    for (size_t i = 0; i < g_styles.size(); ++i)
+        if (key == g_styles[i].id || key == legacy[i])
+            return &g_styles[i];
     return nullptr;
 }
 
@@ -365,7 +371,7 @@ int generateDataFiles(const std::string& dataDir, std::string* error) {
         if (!out)
             return fail("cannot write " + dataDir + "/styles.txt");
         out << "# Virgin style profiles - five levels of boldness\n"
-            << "# 1 = furchtsam (timid) ... 5 = stier (bull)\n\n";
+            << "# 1 = Fortress ... 5 = Thunder\n\n";
         for (const StyleDef& s : g_styles) {
             out << "[style." << s.id << "]\n"
                 << "# level = " << s.level << "\n"

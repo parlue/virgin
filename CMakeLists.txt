@@ -12,6 +12,8 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
 endif()
 
+option(VIRGIN_LIBRARY "Build the in-process shared library with C API / Android JNI" OFF)
+
 option(VIRGIN_LTO "Enable link time optimization" ON)
 option(VIRGIN_STATIC "Link the Android executable fully static (no dependencies)" OFF)
 
@@ -33,13 +35,41 @@ set(VIRGIN_SOURCES
   src/uci.cpp
 )
 
-add_executable(virgin ${VIRGIN_SOURCES})
+option(VIRGIN_EMBEDDED "Host verification of the compact ESP32 backend" OFF)
+set(VIRGIN_EMBEDDED_HASH_KIB 32 CACHE STRING "Compact hash in KiB")
+set(VIRGIN_EMBEDDED_MAX_PLY 24 CACHE STRING "Compact search stack limit")
+if(VIRGIN_EMBEDDED)
+  list(REMOVE_ITEM VIRGIN_SOURCES src/bitboard.cpp)
+  list(APPEND VIRGIN_SOURCES src/bitboard_compact.cpp)
+endif()
+if(VIRGIN_LIBRARY)
+  if(VIRGIN_STATIC OR VIRGIN_EMBEDDED)
+    message(FATAL_ERROR "VIRGIN_LIBRARY requires the normal shared-library backend")
+  endif()
+  list(REMOVE_ITEM VIRGIN_SOURCES src/main.cpp src/match.cpp src/tune.cpp src/selftest.cpp)
+  list(APPEND VIRGIN_SOURCES src/virgin_native.cpp)
+  if(ANDROID)
+    list(APPEND VIRGIN_SOURCES src/virgin_jni.cpp)
+  endif()
+  add_library(virgin SHARED ${VIRGIN_SOURCES})
+  target_compile_definitions(virgin PRIVATE VIRGIN_LIBRARY=1)
+  set_target_properties(virgin PROPERTIES CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN YES)
+else()
+  add_executable(virgin ${VIRGIN_SOURCES})
+endif()
+if(VIRGIN_EMBEDDED)
+  target_compile_definitions(virgin PRIVATE VIRGIN_EMBEDDED=1
+    VIRGIN_EMBEDDED_HASH_KIB=${VIRGIN_EMBEDDED_HASH_KIB}
+    VIRGIN_EMBEDDED_MAX_PLY=${VIRGIN_EMBEDDED_MAX_PLY})
+endif()
 target_include_directories(virgin PRIVATE src)
 
 # Keep the data files next to the binary for the tools / app packaging step.
+if(NOT VIRGIN_LIBRARY)
 add_custom_command(TARGET virgin POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
           "${CMAKE_CURRENT_SOURCE_DIR}/data" "$<TARGET_FILE_DIR:virgin>/data")
+endif()
 
 if(MSVC)
   target_compile_options(virgin PRIVATE /W4 /O2 /fp:fast /EHsc /DNDEBUG /utf-8)
@@ -55,6 +85,9 @@ else()
     # is the most compatible form for chess GUIs.
     target_compile_options(virgin PRIVATE -ffunction-sections -fdata-sections)
     target_link_options(virgin PRIVATE -Wl,--gc-sections -Wl,-s)
+    if(VIRGIN_LIBRARY)
+      target_link_options(virgin PRIVATE -Wl,-z,max-page-size=16384 -Wl,-Bsymbolic -Wl,--exclude-libs,ALL)
+    endif()
     if(VIRGIN_STATIC)
       target_link_options(virgin PRIVATE -static)
     endif()

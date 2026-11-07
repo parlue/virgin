@@ -1,0 +1,40 @@
+[
+  {
+    "test": "windows-selftest",
+    "exit_code": 0,
+    "seconds": 2.91,
+    "rerun_note": "Correct data directory supplied; original invocation pointed to nonexistent test-output directory."
+  },
+  {
+    "test": "compact-selftest",
+    "exit_code": 0,
+    "seconds": 2.17,
+    "rerun_note": "Correct data directory supplied; original invocation pointed to nonexistent test-output directory."
+  },
+  {
+    "test": "multipv-regression",
+    "exit_code": 0,
+    "seconds": 1.98
+  },
+  {
+    "test": "search-regression",
+    "exit_code": 0,
+    "seconds": 34.03
+  },
+  {
+    "test": "adaptive-regression",
+    "exit_code": 0,
+    "seconds": 4.34
+  },
+  {
+    "test": "native-library",
+    "exit_code": 0,
+    "seconds": 4.34
+  },
+  {
+    "test": "performance-compact",
+    "exit_code": 0,
+    "seconds": 0.8,
+    "rerun_note": "Identity assertion accepts the advertised ESP32-S3 suffix; all 14 groups passed."
+  }
+]

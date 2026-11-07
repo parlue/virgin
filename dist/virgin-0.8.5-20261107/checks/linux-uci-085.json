@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "checks": [
+    "UCI 0.8.5 identity",
+    "Confirmed-move performance query",
+    "New-game reset",
+    "Perft(4) 197281",
+    "Infinite-search stop responsive"
+  ]
+}

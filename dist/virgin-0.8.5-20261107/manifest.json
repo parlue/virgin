@@ -1,0 +1,49 @@
+{
+  "engine": "Virgin",
+  "version": "0.8.5",
+  "date": "2026-11-07",
+  "status": "beta",
+  "runtime_tested": [
+    "Windows x64 UCI",
+    "Windows x64 DLL",
+    "compact host core",
+    "WebAssembly headless Chromium",
+    "Linux x86_64 WSL"
+  ],
+  "hardware_runtime_untested": [
+    "Android",
+    "Linux ARMv6",
+    "Linux ARMv7",
+    "ESP32-S3"
+  ],
+  "core2_updated": false,
+  "required_artifacts": {
+    "windows/virgin-0.8.5.exe": "51d50e8c0e33e964772cd657296aa8edf39e719c616e5c0b8b79ac95908287e3",
+    "windows/virgin.dll": "fa2455e3034d88f6f23419cfaac9e550af50baeaaf899b8df7a042dac51fbdc1",
+    "android/virgin-0.8.5.aar": "18ef0008515954998763cea602923ab3fdbf0cda411f0f80c480fba7a56bf935",
+    "web/virgin.js": "6e2288b3b4b623b5f1f3ec3e58b8e0007b3eea9ab94b8982e8acfac5569c1364",
+    "web/virgin.wasm": "adbfa3068ae8eddeb79829dce26173df8946024bc7ea0bed0700f42e7dd0444b",
+    "android/uci/virgin-arm64-v8a": "8494b4da4288ccb0c8a0e1e3eb70c73358c434032bb3bd68c5b47b790c550c7b",
+    "android/jniLibs/arm64-v8a/libvirgin.so": "916f7163496596c9c163c5022d9e6223a8d3db426d5ddbeeaf578d59fbb07e14",
+    "android/uci/virgin-armeabi-v7a": "b13fd8319c83f9db7eb1ed5e6ec5d813e862de76289dda6102766ecb0570cfa8",
+    "android/jniLibs/armeabi-v7a/libvirgin.so": "b79b926b667b02ca2b98ae2694d3a623ebeda7b01d3d4fde10644d45715a3ed9",
+    "android/uci/virgin-x86_64": "4e0907f74eecf61c904bcfeefb11436c4f91f8a799fcaf9ac20a2e5651cb6f00",
+    "android/jniLibs/x86_64/libvirgin.so": "63f6a629a96d7120fa2e25dd9c72ffefe7c6424a13d81b6458b7d98dc6b53735",
+    "android/uci/virgin-x86": "bd090d0c9c3c32486200ff9dc80ec866c753cc9cc6f15a8babdda1399af8e6a4",
+    "android/jniLibs/x86/libvirgin.so": "8eff8a40cb72e578fa7a43b6b67f8ab31b2402fb378111f3033177941954704e",
+    "esp32-s3/mini_no_psram/bootloader.bin": "283313a0d24c1d36ba800699e7b9a14d16c6bacc99447cfddcc6cf2f0794eff5",
+    "esp32-s3/mini_no_psram/partitions.bin": "c9a826e85500d14d1854ce78e47452d4614a1be371bbd056278d2cb3398fbbfd",
+    "esp32-s3/mini_no_psram/firmware.bin": "5cdb15eaa85285ebf40f739b5725eb3542abd3acf62087a1deba734cd62d14ff",
+    "esp32-s3/mini_psram_qspi/bootloader.bin": "9de07ceab325b2d899f6d1dd7f4d8d7900ebaaa9458ba64941d0cb54cfd891e8",
+    "esp32-s3/mini_psram_qspi/partitions.bin": "c9a826e85500d14d1854ce78e47452d4614a1be371bbd056278d2cb3398fbbfd",
+    "esp32-s3/mini_psram_qspi/firmware.bin": "07a6a3ae3f48dbe715b718fc9f9a8801079a18afe47f5ad503d9c1e07f7f1d55",
+    "esp32-s3/mini_psram_opi/bootloader.bin": "3c9c505106e4ed278d42399b7c13c26944050fdfdad80cb48e3954404a9e0ade",
+    "esp32-s3/mini_psram_opi/partitions.bin": "c9a826e85500d14d1854ce78e47452d4614a1be371bbd056278d2cb3398fbbfd",
+    "esp32-s3/mini_psram_opi/firmware.bin": "72d75c039b751123e335bc66124dfb7dc235e9fce2af82a671bcdce3960a4481",
+    "linux/virgin-0.8.5-linux-x86_64": "c239958139c8a13cf32b8db79d5285259190741e44559420f52bad4c59946386",
+    "linux/virgin-0.8.5-linux-armv6": "f2b203721e90222166de329296493552861dd19be78db983ccbccffe0e900058",
+    "linux/virgin-0.8.5-linux-armv7": "d9547e9779b1b5b792260a4defb9786dc758ffc09d707626411b6ff591cfeb21"
+  },
+  "source_hash_inventory": "checks/source-sha256.json",
+  "public_source_note": "PUBLIC_SOURCE_NOTES.md"
+}

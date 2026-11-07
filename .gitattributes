@@ -1,0 +1,3 @@
+* text=auto eol=lf
+# Release bytes and their checksums must survive checkout unchanged.
+/dist/virgin-0.8.5-20261107/** -text -diff

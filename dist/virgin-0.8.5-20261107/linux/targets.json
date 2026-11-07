@@ -1,0 +1,19 @@
+{
+  "compiler": "Zig 0.15.2",
+  "libc": "statically linked musl",
+  "targets": {
+    "x86_64": [
+      "x86_64-linux-musl",
+      "baseline"
+    ],
+    "armv6": [
+      "arm-linux-musleabihf",
+      "arm1176jzf_s"
+    ],
+    "armv7": [
+      "arm-linux-musleabihf",
+      "generic+v7a+vfp3d16"
+    ]
+  },
+  "source_version": "0.8.5"
+}

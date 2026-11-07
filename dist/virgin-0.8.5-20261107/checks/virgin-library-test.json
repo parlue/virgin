@@ -1,0 +1,12 @@
+{
+  "passed": [
+    "A second concurrent session is rejected",
+    "UCI identity, timeout and undersized-buffer retention",
+    "Malformed and oversized input is rejected",
+    "Depth-6 score, node count and PV match the standalone engine exactly",
+    "Adaptive emits five candidates, selection and a legal bestmove",
+    "isready and stop remain responsive during infinite search",
+    "Destroy stops and joins an active search",
+    "12 create/search/quit/destroy cycles reset state and finish cleanly"
+  ]
+}

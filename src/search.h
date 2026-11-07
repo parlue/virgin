@@ -13,11 +13,17 @@
 #include <vector>
 
 struct SearchLimits {
+    std::atomic<bool>* cancellation = nullptr; // UCI request cancellation across serial analysis/main searches.
+    bool restrictRootMoves = false;
+    std::vector<Move> rootMoves; // Legal root candidates from UCI searchmoves.
     int      multiPV = 1; // internal root candidate count, independent of strength handicaps
     int      depth = 64;
     uint64_t nodes = 0;
-    int      movetime = 0;
-    int64_t  wtime = 0, btime = 0;
+    int64_t  movetime = 0;
+    int      automaticTime = 0; // Bare go: maximum, not a fixed waiting time.
+    int      moveOverhead = 50;
+    bool     openingVariety = false;
+    int64_t  wtime = -1, btime = -1;
     int64_t  winc = 0, binc = 0;
     int      movestogo = 0;
     bool     infinite = false;
@@ -31,6 +37,7 @@ struct SearchCandidate {
 
 struct SearchResult {
     std::vector<SearchCandidate> candidates; // complete same-depth root batch only
+    std::vector<SearchCandidate> previousCandidates; // Previous complete depth, for safe opening ties.
     Move     best = 0;
     Move     ponder = 0;
     std::vector<Move> pv; // searched principal variation, capped to 16 moves
@@ -40,6 +47,7 @@ struct SearchResult {
     uint64_t nodes = 0;
     int64_t  timeMs = 0;
     bool     stopped = false;
+    bool     openingVariety = false;
 };
 
 // Strength handicap (set by the Elo profile, see botdata.cpp).
@@ -77,3 +85,10 @@ uint64_t benchNodes(int depth);
 
 // Internal search regression checks used by --selftest.
 bool searchRegressionTests(std::ostream& out);
+
+#ifdef VIRGIN_EMBEDDED
+void setSearchPoll(void (*poll)());
+#endif
+
+// Returns zero unless a stable, near-equal, materially safe opening alternative exists.
+size_t chooseOpeningCandidate(const Position& pos, const SearchResult& result, double pick);

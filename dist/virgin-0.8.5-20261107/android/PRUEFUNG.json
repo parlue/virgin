@@ -1,0 +1,96 @@
+{
+  "version": "0.8.5",
+  "android_min_api": 21,
+  "android_runtime_tested": false,
+  "checks": [
+    {
+      "file": "jniLibs\\arm64-v8a\\libvirgin.so",
+      "sha256": "916f7163496596c9c163c5022d9e6223a8d3db426d5ddbeeaf578d59fbb07e14",
+      "elf_machine": 183,
+      "load_segment_alignment": [
+        16384,
+        16384,
+        16384
+      ],
+      "matches_final_build": true
+    },
+    {
+      "file": "uci\\virgin-arm64-v8a",
+      "sha256": "8494b4da4288ccb0c8a0e1e3eb70c73358c434032bb3bd68c5b47b790c550c7b",
+      "elf_machine": 183,
+      "load_segment_alignment": [
+        16384,
+        16384,
+        16384
+      ],
+      "matches_final_build": true
+    },
+    {
+      "file": "jniLibs\\armeabi-v7a\\libvirgin.so",
+      "sha256": "b79b926b667b02ca2b98ae2694d3a623ebeda7b01d3d4fde10644d45715a3ed9",
+      "elf_machine": 40,
+      "load_segment_alignment": [
+        16384,
+        16384,
+        16384
+      ],
+      "matches_final_build": true
+    },
+    {
+      "file": "uci\\virgin-armeabi-v7a",
+      "sha256": "b13fd8319c83f9db7eb1ed5e6ec5d813e862de76289dda6102766ecb0570cfa8",
+      "elf_machine": 40,
+      "load_segment_alignment": [
+        16384,
+        16384,
+        16384
+      ],
+      "matches_final_build": true
+    },
+    {
+      "file": "jniLibs\\x86_64\\libvirgin.so",
+      "sha256": "63f6a629a96d7120fa2e25dd9c72ffefe7c6424a13d81b6458b7d98dc6b53735",
+      "elf_machine": 62,
+      "load_segment_alignment": [
+        16384,
+        16384,
+        16384
+      ],
+      "matches_final_build": true
+    },
+    {
+      "file": "uci\\virgin-x86_64",
+      "sha256": "4e0907f74eecf61c904bcfeefb11436c4f91f8a799fcaf9ac20a2e5651cb6f00",
+      "elf_machine": 62,
+      "load_segment_alignment": [
+        16384,
+        16384,
+        16384
+      ],
+      "matches_final_build": true
+    },
+    {
+      "file": "jniLibs\\x86\\libvirgin.so",
+      "sha256": "8eff8a40cb72e578fa7a43b6b67f8ab31b2402fb378111f3033177941954704e",
+      "elf_machine": 3,
+      "load_segment_alignment": [
+        16384,
+        16384,
+        16384
+      ],
+      "matches_final_build": true
+    },
+    {
+      "file": "uci\\virgin-x86",
+      "sha256": "bd090d0c9c3c32486200ff9dc80ec866c753cc9cc6f15a8babdda1399af8e6a4",
+      "elf_machine": 3,
+      "load_segment_alignment": [
+        16384,
+        16384,
+        16384
+      ],
+      "matches_final_build": true
+    }
+  ],
+  "uci_integration_host": "14 checks PASS; see performance-0.8.5.json"
+}

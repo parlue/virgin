@@ -39,7 +39,9 @@ inline int boundOf(const TTEntry& e) { return int(e.depthBound) & 3; }
 
 class TranspositionTable {
 public:
+    void release(); // Only while all search workers are stopped.
     void resize(size_t megabytes);
+    void resizeKiB(size_t kilobytes);
     void clear();
     void newSearch() { ++generation; }
 
@@ -52,7 +54,11 @@ public:
 
 private:
     // Protect complete entries; readers use a snapshot after releasing the lock.
+    #ifdef VIRGIN_EMBEDDED
+    mutable std::array<std::mutex, 1> locks;
+#else
     mutable std::array<std::mutex, 256> locks;
+#endif
     std::vector<TTEntry> table;
     size_t               entryMask = 0;
     uint8_t              generation = 0;

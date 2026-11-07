@@ -1,9 +1,9 @@
 # Virgin style profiles - five levels of boldness
-# 1 = furchtsam (timid) ... 5 = stier (bull)
+# 1 = Fortress ... 5 = Thunder
 
-[style.furchtsam]
+[style.fortress]
 # level = 1
-# name  = Furchtsam
+# name  = Fortress
 # desc  = Sicherheit zuerst, meidet Schaerfe, nimmt Remis an
 Misc.Contempt = -25
 Group.Material = 120
@@ -23,9 +23,9 @@ Rooks.OpenFileVsKing = 15
 KingSafety.ShieldMissing = -35
 Pst.KingMgShelter = 30
 
-[style.vorsichtig]
+[style.stone]
 # level = 2
-# name  = Vorsichtig
+# name  = Stone
 # desc  = Solide und positionell, geringes Risiko
 Misc.Contempt = -5
 Group.Material = 110
@@ -43,34 +43,34 @@ Aggression.SacrificeTolerance = 40
 Aggression.AvoidQueenTrade = 50
 Rooks.OpenFileVsKing = 24
 
-[style.ausgeglichen]
+[style.normal]
 # level = 3
-# name  = Ausgeglichen
+# name  = Normal
 # desc  = Referenzstil, alle Gewichte auf Standard
 
-[style.angriffslustig]
+[style.fire]
 # level = 4
-# name  = Angriffslustig
+# name  = Fire
 # desc  = Sucht den Koenigsangriff, meidet Damentausch
 Misc.Contempt = 15
-Group.Material = 95
-Group.KingSafety = 90
-Group.Pawns = 85
+Group.Material = 100
+Group.KingSafety = 110
+Group.Pawns = 100
 Group.Mobility = 105
 Group.Threats = 110
 Group.Drawish = 90
-Group.Aggression = 150
-Group.Complexity = 150
-Aggression.KingAttack = 150
-Aggression.PawnStorm = 160
+Group.Aggression = 125
+Group.Complexity = 100
+Aggression.KingAttack = 125
+Aggression.PawnStorm = 120
 Aggression.Initiative = 150
-Aggression.SacrificeTolerance = 180
-Aggression.AvoidQueenTrade = 150
+Aggression.SacrificeTolerance = 120
+Aggression.AvoidQueenTrade = 110
 Rooks.OpenFileVsKing = 42
 
-[style.stier]
+[style.thunder]
 # level = 5
-# name  = Stier
+# name  = Thunder
 # desc  = Tollkuehn: Opfer, Bauernsturm, Koenig jagt Koenig
 Misc.Contempt = 45
 Group.Material = 90

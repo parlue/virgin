@@ -1,0 +1,50 @@
+{
+  "engine": "Virgin 0.8.5",
+  "author": "Dirk D. Sommerfeld",
+  "emscripten": "6.0.13",
+  "uci_threads_max": 4,
+  "hash_default_mib": 32,
+  "hash_max_mib": 256,
+  "wasm_memory_initial_mib": 128,
+  "wasm_memory_max_mib": 512,
+  "requires_cross_origin_isolation": true,
+  "external_network_files_required": false,
+  "files": {
+    "ENGINE-LICENSE.txt": {
+      "bytes": 1084,
+      "sha256": "95c268177fab4580e8ac5997405d6723defa2033dcf161ae8d881a0ef841fffb"
+    },
+    "engine-worker.js": {
+      "bytes": 3431,
+      "sha256": "1f00fad120164d9bc2325d1a7945b99fea1d5e9c6e8de53c85a4f427feab401b"
+    },
+    "index.html": {
+      "bytes": 2727,
+      "sha256": "bb3dcc1a5811edbf382e6610eb8bfa0eeb4b14ff7c3c0fa33272d4726ed64217"
+    },
+    "licenses/EMSCRIPTEN-LICENSE.txt": {
+      "bytes": 5093,
+      "sha256": "620a78084fc7ca97c0b5dea9abf891f3ffcadfdbf305276f099c9c4e12fc1d86"
+    },
+    "licenses/LIBCXX-LICENSE.txt": {
+      "bytes": 16703,
+      "sha256": "539dd7aed86e8a4f12cbdd0e6c50c189c7d74847e4fecc64ce2c6ee3a01da38b"
+    },
+    "README.md": {
+      "bytes": 5786,
+      "sha256": "ef00f089cabd6ea7467765ebf651312b1fc50c0010ada86e637333381e867645"
+    },
+    "serve.py": {
+      "bytes": 1099,
+      "sha256": "a996420499c4f1646c032b863903e89e954aae2c33e15cf3c1f5acff42b51596"
+    },
+    "virgin.js": {
+      "bytes": 118168,
+      "sha256": "6e2288b3b4b623b5f1f3ec3e58b8e0007b3eea9ab94b8982e8acfac5569c1364"
+    },
+    "virgin.wasm": {
+      "bytes": 583302,
+      "sha256": "adbfa3068ae8eddeb79829dce26173df8946024bc7ea0bed0700f42e7dd0444b"
+    }
+  }
+}

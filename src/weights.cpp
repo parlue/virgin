@@ -60,6 +60,7 @@ const WeightDef WEIGHT_DEFS[] = {
     // ---------------------------------------------------------- king safety
     {"KingSafety.AttackUnits",       100,    0,   400},
     {"KingSafety.Saturation",        256,   64, 4096},
+    {"KingSafety.PawnStorm",         -10,  -80,     0},
     {"KingSafety.ShieldMissing",     -22, -120,     0},
     {"KingSafety.ShieldPawn",          8,    0,    60},
     {"KingSafety.OpenFileNearKing",  -28, -160,     0},
@@ -117,6 +118,9 @@ const WeightDef WEIGHT_DEFS[] = {
 
     // -------------------------------------------------------------- drawish
     {"Drawish.OppositeBishops",  60,    0, 200},
+    {"Drawish.RookMinorVsRook",  12,    0, 100},
+    {"Drawish.RookVsMinor",      20,    0, 100},
+    {"Drawish.TwoKnights",        8,    0, 100},
     {"Drawish.Insufficient",      0,    0, 200},
 
     // -------------------------------------------------------------- endgame
@@ -342,6 +346,7 @@ void refresh_eval_weights() {
 
     TW.attackUnits       = w("KingSafety.AttackUnits");
     TW.saturation        = std::max(1, w("KingSafety.Saturation"));
+    TW.pawnStorm          = w("KingSafety.PawnStorm");
     TW.shieldMissing     = w("KingSafety.ShieldMissing");
     TW.shieldPawn        = w("KingSafety.ShieldPawn");
     TW.openFileNearKing  = w("KingSafety.OpenFileNearKing");
@@ -394,6 +399,9 @@ void refresh_eval_weights() {
     TW.complexityWeight = w("Complexity.Weight");
 
     TW.drawishOppositeBishops = w("Drawish.OppositeBishops");
+    TW.drawishRookMinorVsRook = w("Drawish.RookMinorVsRook");
+    TW.drawishRookVsMinor = w("Drawish.RookVsMinor");
+    TW.drawishTwoKnights = w("Drawish.TwoKnights");
     TW.drawishInsufficient    = w("Drawish.Insufficient");
 
     TW.endgameKingActivity        = w("Endgame.KingActivity");

@@ -3,6 +3,7 @@
 #pragma once
 
 #include <string>
+#include <iosfwd>
 
 // Initialise the UCI layer (data files, options). Call after the engine
 // subsystems (bitboards, zobrist, weights) are initialised.
@@ -17,3 +18,8 @@ bool uciCommandLine(int argc, char** argv);
 
 // Select a bot profile by id (also usable from the command line).
 void uciSetBot(const std::string& id);
+
+// In-process library front end. Exactly one live engine session per process.
+int uciRun(std::istream& input, std::ostream& output);
+void uciShutdown();
+void uciResetSession();

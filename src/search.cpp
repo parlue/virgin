@@ -1,6 +1,9 @@
 // Virgin - UCI chess engine
 // Search implementation.
 #include "search.h"
+#include "time_policy.h"
+#include "uci_output.h"
+#include "embedded_config.h"
 
 #include "eval.h"
 #include "movegen.h"
@@ -22,7 +25,14 @@ Strength g_strength;
 
 namespace {
 
+#ifdef VIRGIN_EMBEDDED
+constexpr int MAX_PLY = VIRGIN_EMBEDDED_MAX_PLY;
+#define VIRGIN_THREAD_LOCAL
+void (*g_searchPoll)() = nullptr;
+#else
 constexpr int MAX_PLY = 128;
+#define VIRGIN_THREAD_LOCAL thread_local
+#endif
 constexpr int MAX_PV = 16;
 
 std::atomic<bool> g_stop{false};
@@ -30,6 +40,7 @@ std::atomic<uint64_t> g_nodes{0};
 uint64_t          g_nodeLimit = 0;
 int64_t           g_hardMs = 0;
 int64_t           g_softMs = 0;
+bool g_infinite = false;
 std::chrono::steady_clock::time_point g_start;
 int               g_threads = 0;   // 0 = automatic (see threadCount())
 
@@ -38,35 +49,39 @@ int               g_threads = 0;   // 0 = automatic (see threadCount())
 // same time, so the automatic default is worth having - a fixed default of 1
 // would leave the whole gain on the table unless the GUI sets the option.
 int defaultThreads() {
+#ifdef VIRGIN_EMBEDDED
+    return 1;
+#else
     const unsigned cores = std::thread::hardware_concurrency();
     if (cores == 0)
         return 1;
     // Four threads was the sweet spot in the measurement; more only costs
     // power and heat (relevant on a phone) without adding depth.
     return int(std::min<unsigned>(cores, 4));
+#endif
 }
 
 // Per thread. Two threads must never share killers, history, the counter moves
 // or the line of keys - they would corrupt each other. Only the transposition
 // table is shared, which is the whole point of Lazy SMP: the helpers fill it
 // and the main thread profits.
-thread_local std::mt19937 g_rng(20260101u);
-thread_local int          g_seldepth = 0;
-thread_local uint32_t t_pendingNodes = 0;
-thread_local bool t_testUnpruned = false;
-thread_local bool t_testRootFull = false;
-thread_local int t_aspirationMargin = 30;
-thread_local unsigned t_aspirationRetries = 0;
-thread_local bool         t_helper = false;   // helper thread (no output, no soft limit)
+VIRGIN_THREAD_LOCAL std::mt19937 g_rng(20260101u);
+VIRGIN_THREAD_LOCAL int          g_seldepth = 0;
+VIRGIN_THREAD_LOCAL uint32_t t_pendingNodes = 0;
+VIRGIN_THREAD_LOCAL bool t_testUnpruned = false;
+VIRGIN_THREAD_LOCAL bool t_testRootFull = false;
+VIRGIN_THREAD_LOCAL int t_aspirationMargin = 30;
+VIRGIN_THREAD_LOCAL unsigned t_aspirationRetries = 0;
+VIRGIN_THREAD_LOCAL bool         t_helper = false;   // helper thread (no output, no soft limit)
 
 // Zobrist keys of the current line (game moves first, then the search path).
-thread_local std::vector<Key> g_keyHistory;
-thread_local size_t g_repetitionStart = 0;
-thread_local size_t g_rootHistoryIndex = 0;
+VIRGIN_THREAD_LOCAL std::vector<Key> g_keyHistory;
+VIRGIN_THREAD_LOCAL size_t g_repetitionStart = 0;
+VIRGIN_THREAD_LOCAL size_t g_rootHistoryIndex = 0;
 
-thread_local int16_t g_history[COLOR_NB][SQUARE_NB][SQUARE_NB];
-thread_local int16_t g_continuation[2048]; // 4 KiB per worker, hashed one-ply context
-thread_local Move    g_counterMove[COLOR_NB][SQUARE_NB][SQUARE_NB];
+VIRGIN_THREAD_LOCAL int16_t g_history[COLOR_NB][SQUARE_NB][SQUARE_NB];
+VIRGIN_THREAD_LOCAL int16_t g_continuation[2048]; // 4 KiB per worker, hashed one-ply context
+VIRGIN_THREAD_LOCAL Move    g_counterMove[COLOR_NB][SQUARE_NB][SQUARE_NB];
 int                  g_lmr[MAX_PLY][64];
 
 struct StackEntry {
@@ -76,7 +91,7 @@ struct StackEntry {
     Move pv[MAX_PV] = {};
     int pvLength = 0;
 };
-thread_local StackEntry g_stack[MAX_PLY + 4];
+VIRGIN_THREAD_LOCAL StackEntry g_stack[MAX_PLY + 4];
 
 void updatePv(int ply, Move move) {
     StackEntry& ss = g_stack[ply];
@@ -86,6 +101,50 @@ void updatePv(int ply, Move move) {
     std::copy_n(child.pv, count, ss.pv + 1);
     ss.pvLength = count + 1;
 }
+
+using TimeBudget = VirginTime::Budget;
+TimeBudget allocateTime(const Position& pos, const SearchLimits& limits) {
+#ifdef VIRGIN_CORE2
+    if (limits.infinite) return {};
+    if (limits.movetime > 0)
+        return {std::max<int64_t>(1, limits.movetime * 9 / 10), limits.movetime};
+    const int64_t time = pos.sideToMove() == WHITE ? limits.wtime : limits.btime;
+    const int64_t increment = pos.sideToMove() == WHITE ? limits.winc : limits.binc;
+    if (time < 0) return {}; // depth/node search without a clock
+    if (time <= 1) return {1, 1};
+    const int64_t reserve = std::min<int64_t>(50, time / 10);
+    const int64_t usable = std::max<int64_t>(1, time - reserve);
+    const int moves = limits.movestogo > 0 ? limits.movestogo : 30;
+    int64_t budget = std::max<int64_t>(1, time / moves + std::max<int64_t>(0, increment) * 3 / 4);
+    budget = std::min(budget, std::max<int64_t>(1, usable / 3));
+    // A generous game clock is not a reason to spend minutes on move one.
+    // Fixed movetime/depth/node instructions remain separate from this policy.
+    const bool opening = pos.fullmoveNumber() <= 4;
+    if (opening) budget = std::min<int64_t>(budget, 1500);
+    int64_t hard = std::max<int64_t>(1, std::min<int64_t>(budget * 4, usable / 2));
+    if (opening) hard = std::min<int64_t>(hard, 3000);
+    return {budget, hard};
+#else
+    if (limits.infinite) return {};
+    return VirginTime::allocate(pos.sideToMove() == WHITE ? limits.wtime : limits.btime,
+        pos.sideToMove() == WHITE ? limits.winc : limits.binc, limits.movestogo,
+        pos.fullmoveNumber() <= 4, limits.movetime, limits.automaticTime, limits.moveOverhead);
+#endif
+}
+
+struct EasyMove {
+    Move last = 0;
+    int stable = 0;
+    Score scores[4] = {}, gaps[4] = {};
+    bool update(Move move, Score score, Score gap, int depth, int64_t elapsed, bool timed) {
+        if (move != last) { last = move; stable = 0; }
+        const int index = stable++ % 4;
+        scores[index] = score; gaps[index] = gap;
+        if (!timed || depth < 8 || elapsed < 250 || stable < 4) return false;
+        const auto range = std::minmax_element(scores, scores + 4);
+        return *range.second - *range.first <= 20 && *std::min_element(gaps, gaps + 4) >= 150;
+    }
+};
 
 int64_t elapsedMs() {
     return std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -112,9 +171,17 @@ void flushNodes() {
 bool visitNode() {
     if (g_stop.load(std::memory_order_relaxed))
         return false;
-    if (++t_pendingNodes >= 256) {
+#if defined(VIRGIN_EMBEDDED) && !defined(VIRGIN_CORE2)
+    constexpr unsigned checkInterval = 32; // Low MCU NPS must not hide a near deadline.
+#else
+    constexpr unsigned checkInterval = 256;
+#endif
+    if (++t_pendingNodes >= checkInterval) {
         flushNodes();
         checkLimits();
+#ifdef VIRGIN_EMBEDDED
+        if (g_searchPoll && (g_nodes.load(std::memory_order_relaxed) & 255) == 0) g_searchPoll();
+#endif
     }
     return !g_stop.load(std::memory_order_relaxed);
 }
@@ -141,6 +208,13 @@ bool isRepetition(const Position& pos) {
             return true;
     }
     return false;
+}
+
+bool zugzwangRisk(const Position& pos) {
+    const Bitboard men = pos.pieces(KNIGHT) | pos.pieces(BISHOP) | pos.pieces(ROOK);
+    const Color us = pos.sideToMove();
+    return !pos.pieces(QUEEN) && popcount(men) <= 3
+        && popcount(pos.pieces(PAWN)) <= 6 && popcount(men & pos.pieces(us)) <= 1;
 }
 
 bool hasNonPawnMaterial(const Position& pos, Color c) {
@@ -176,6 +250,9 @@ bool tacticalQuiet(const Position& pos, Move move) {
         }
         return false;
     }
+#ifndef VIRGIN_CORE2
+    if (pos.isCastle(move)) return true; // Keep king-safety moves out of quiet pruning.
+#endif
     if (pt == KING)
         return false;
     const Bitboard danger = pawnAttackMap(~us, pos.pieces(~us, PAWN));
@@ -319,7 +396,9 @@ Score qsearch(Position& pos, Score alpha, Score beta, int ply, int qPly = 0) {
     }
 
     MoveList list;
-    const bool quietChecks = !inCheck && qPly == 0 && (beta - alpha > 1 || t_testUnpruned);
+    // PV-ness is a property of the incoming window. Stand pat may raise
+    // alpha to beta-1 without turning this into a non-PV leaf.
+    const bool quietChecks = !inCheck && qPly == 0 && (pvNode || t_testUnpruned);
     generatePseudoLegal(pos, list, !inCheck && !quietChecks);
     if (quietChecks) {
         const Color us = pos.sideToMove();
@@ -464,8 +543,9 @@ Score search(Position& pos, int depth, Score alpha, Score beta, int ply, bool cu
     const bool threatenedPiece = (pawnDanger & pos.pieces(us)
                                   & ~pos.pieces(us, PAWN) & ~pos.pieces(us, KING)) != 0;
 
+    const bool endgameRisk = zugzwangRisk(pos);
     // ------------------------------------------------------------- pruning
-    if (!t_testUnpruned && !pvNode && !inCheck && !is_mate_score(beta)) {
+    if (!t_testUnpruned && !endgameRisk && !pvNode && !inCheck && !is_mate_score(beta)) {
         // Reverse futility pruning
         if (!threatenedPiece && depth <= 7 && staticScore - 75 * depth >= beta)
             return staticScore;
@@ -497,7 +577,7 @@ Score search(Position& pos, int depth, Score alpha, Score beta, int ply, bool cu
     }
 
     // Internal iterative reduction when no TT move is available
-    if (!t_testUnpruned && depth >= 5 && !ttMove && !inCheck && !threatenedPiece)
+    if (!t_testUnpruned && depth >= 5 && !ttMove && !inCheck && !threatenedPiece && !endgameRisk)
         --depth;
 
     MoveList list;
@@ -540,7 +620,7 @@ Score search(Position& pos, int depth, Score alpha, Score beta, int ply, bool cu
         const bool dangerousQuiet = !isCaptureMove && !isPromoMove && tacticalQuiet(pos, m);
 
         // Futility pruning and late move pruning (quiet moves only)
-        if (!t_testUnpruned && !rootNode && !pvNode && !inCheck && !isCaptureMove && !isPromoMove && !givesCheck && !dangerousQuiet
+        if (!t_testUnpruned && !endgameRisk && !rootNode && !pvNode && !inCheck && !isCaptureMove && !isPromoMove && !givesCheck && !dangerousQuiet
             && best > -SCORE_MATE_BOUND && g_stack[ply].staticEval != SCORE_NONE) {
             if (depth <= 8 && g_stack[ply].staticEval + 100 + 120 * depth <= alpha)
                 continue;
@@ -562,7 +642,7 @@ Score search(Position& pos, int depth, Score alpha, Score beta, int ply, bool cu
             s = -search(next, newDepth, -beta, -alpha, ply + 1, false);
         } else {
             int r = 0;
-            if (!t_testUnpruned && depth >= 3 && moveCount > 3 && !isCaptureMove && !isPromoMove && !inCheck
+            if (!t_testUnpruned && !endgameRisk && depth >= 3 && moveCount > 3 && !isCaptureMove && !isPromoMove && !inCheck
                 && !givesCheck) {
                 r = g_lmr[std::min(depth, MAX_PLY - 1)][std::min(moveCount, 63)];
                 if (cutNode)
@@ -701,7 +781,7 @@ bool searchRootCandidates(const Position& pos, std::vector<Move>& moves, int dep
 // prints the UCI info lines and honours the soft time limit; the helpers of
 // Lazy SMP only fill the shared transposition table and stop on the hard limit.
 SearchResult runSearch(const Position& pos, const std::vector<Key>& gameHistory, int maxDepth,
-                       std::ostream& out, int multiPV = 1) {
+                       std::ostream& out, int multiPV = 1, const std::vector<Move>* allowed = nullptr) {
     SearchResult result;
 
     g_keyHistory = gameHistory;
@@ -718,6 +798,12 @@ SearchResult runSearch(const Position& pos, const std::vector<Key>& gameHistory,
         return result;
 
     std::vector<Move>  rootMoves(rootList.begin(), rootList.end());
+    if (allowed) {
+        rootMoves.erase(std::remove_if(rootMoves.begin(), rootMoves.end(), [&](Move m) {
+            return std::find(allowed->begin(), allowed->end(), m) == allowed->end();
+        }), rootMoves.end());
+        if (rootMoves.empty()) return result;
+    }
     std::vector<Score> rootScores(rootMoves.size(), Score(-SCORE_INFINITE));
 
     Score bestScore = -SCORE_INFINITE;
@@ -727,11 +813,42 @@ SearchResult runSearch(const Position& pos, const std::vector<Key>& gameHistory,
     g_stack[0].staticEval = rootStatic;
     const bool exactRootScores = g_strength.moveNoise > 0 || t_testRootFull;
     t_aspirationRetries = 0;
+    EasyMove easy;
+#ifndef VIRGIN_CORE2
+    VirginTime::Decision timeDecision;
+#endif
+    const auto timeFinished = [&](int depth, bool clear) {
+#ifdef VIRGIN_CORE2
+        return !t_helper && g_softMs > 0 && elapsedMs() >= g_softMs && depth >= 2;
+#else
+        return !t_helper && timeDecision.finish({g_softMs,g_hardMs},bestMove,bestScore,
+                                               depth,elapsedMs(),clear);
+#endif
+    };
+    const auto finishEarly = [&](Score gap, int depth) {
+        if (t_helper || g_infinite) return false;
+        if (rootMoves.size() == 1 && allowed == nullptr) {
+            const UciOutputGuard outputGuard;
+            out << "info string early move: only legal move" << std::endl;
+            return true;
+        }
+        const bool timed = (g_softMs > 0 || g_hardMs > 0)
+            && !g_strength.evalNoise && !g_strength.moveNoise && !g_strength.blunderPct;
+        if (easy.update(bestMove, bestScore, gap, depth, elapsedMs(), timed)) {
+            const UciOutputGuard outputGuard;
+            out << "info string early move: stable clear candidate" << std::endl;
+            return true;
+        }
+        return false;
+    };
 
     for (int depth = 1; depth <= maxDepth; ++depth) {
         if (multiPV > 1) {
             std::vector<SearchCandidate> batch;
             if (!searchRootCandidates(pos, rootMoves, depth, multiPV, batch)) break;
+#ifndef VIRGIN_CORE2
+            result.previousCandidates = result.candidates;
+#endif
             result.candidates = std::move(batch);
             const SearchCandidate& best = result.candidates.front();
             bestMove = best.move; bestScore = best.score;
@@ -740,6 +857,7 @@ SearchResult runSearch(const Position& pos, const std::vector<Key>& gameHistory,
             TT.store(pos.key(), bestMove, bestScore, rootStatic, depth, BOUND_EXACT, 0);
             flushNodes();
             if (!t_helper) {
+                const UciOutputGuard outputGuard;
                 const int64_t ms = elapsedMs();
                 const uint64_t nodes = g_nodes.load(std::memory_order_relaxed);
                 for (size_t rank = 0; rank < result.candidates.size(); ++rank) {
@@ -751,9 +869,12 @@ SearchResult runSearch(const Position& pos, const std::vector<Key>& gameHistory,
                     out << std::endl;
                 }
             }
-            if (is_mate_score(bestScore)) break;
+            if (is_mate_score(bestScore) && !g_infinite) break;
+            const Score gap = result.candidates.size() > 1
+                ? result.candidates[0].score - result.candidates[1].score : SCORE_INFINITE;
+            if (finishEarly(gap, depth)) break;
             if (g_nodeLimit && g_nodes.load(std::memory_order_relaxed) >= g_nodeLimit) break;
-            if (!t_helper && g_softMs > 0 && elapsedMs() >= g_softMs && depth >= 2) break;
+            if (timeFinished(depth, gap >= 100)) break;
             if (g_hardMs > 0 && elapsedMs() >= g_hardMs) break;
             continue;
         }
@@ -870,6 +991,7 @@ SearchResult runSearch(const Position& pos, const std::vector<Key>& gameHistory,
         // Only the main thread talks to the GUI - helpers would interleave
         // their lines with its own.
         if (!t_helper) {
+            const UciOutputGuard outputGuard;
             out << "info depth " << depth << " seldepth " << g_seldepth << " score cp " << bestScore
                 << " nodes " << n << " nps " << nps << " hashfull " << TT.hashfull()
                 << " time " << ms << " pv";
@@ -878,15 +1000,23 @@ SearchResult runSearch(const Position& pos, const std::vector<Key>& gameHistory,
             out << std::endl;
         }
 
-        if (is_mate_score(bestScore))
+        if (is_mate_score(bestScore) && !g_infinite)
             break;
+        Score second = -SCORE_INFINITE;
+        for (size_t i = 0; i < rootMoves.size(); ++i)
+            if (rootMoves[i] != bestMove) second = std::max(second, rootScores[i]);
+        if (finishEarly(bestScore - second, depth)) break;
         if (g_nodeLimit > 0 && g_nodes.load(std::memory_order_relaxed) >= g_nodeLimit)
             break;
-        if (!t_helper && g_softMs > 0 && elapsedMs() >= g_softMs && depth >= 2)
+        if (timeFinished(depth, bestScore - second >= 100))
             break;
         if (g_hardMs > 0 && elapsedMs() >= g_hardMs)
             break;
     }
+
+    // Analysis is explicitly unbounded, even if depth 64 or a mate was reached.
+    while (!t_helper && g_infinite && !g_stop.load(std::memory_order_relaxed))
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
 
     // -------------------------------- strength: blunder chance and move noise
     if (rootMoves.size() > 1 && !g_stop.load(std::memory_order_relaxed)) {
@@ -924,6 +1054,8 @@ SearchResult searchPosition(const Position& pos, const SearchLimits& limits,
     SearchResult result;
 
     g_stop.store(false, std::memory_order_relaxed);
+    if(limits.cancellation && limits.cancellation->load(std::memory_order_acquire))
+        g_stop.store(true,std::memory_order_relaxed);
     // The UCI reader may accept stop only after this reset has happened.
     if (started)
         started->store(true, std::memory_order_release);
@@ -933,22 +1065,9 @@ SearchResult searchPosition(const Position& pos, const SearchLimits& limits,
     g_hardMs    = 0;
     g_softMs    = 0;
 
-    // ------------------------------------------------------------ time budget
-    if (limits.movetime > 0) {
-        g_hardMs = limits.movetime;
-        g_softMs = limits.movetime * 9 / 10;
-    } else if (!limits.infinite && limits.depth >= 64) {
-        const int64_t time = (pos.sideToMove() == WHITE) ? limits.wtime : limits.btime;
-        const int64_t inc  = (pos.sideToMove() == WHITE) ? limits.winc : limits.binc;
-        if (time > 0) {
-            const int mtg    = limits.movestogo > 0 ? limits.movestogo : 30;
-            int64_t   budget = time / mtg + inc * 3 / 4;
-            budget           = std::max<int64_t>(budget, 1);
-            budget           = std::min(budget, time / 3);
-            g_softMs         = budget;
-            g_hardMs         = std::max<int64_t>(1, std::min<int64_t>(budget * 4, time / 2));
-        }
-    }
+    g_infinite = limits.infinite;
+    const TimeBudget budget = allocateTime(pos, limits);
+    g_softMs = budget.soft; g_hardMs = budget.hard;
 
     const int depthCap = g_strength.maxDepth > 0 ? g_strength.maxDepth : 64;
     const int maxDepth = limits.infinite ? 64 : std::min(limits.depth, depthCap);
@@ -963,25 +1082,41 @@ SearchResult searchPosition(const Position& pos, const SearchLimits& limits,
     std::vector<std::thread> helpers;
     const int threads = threadCount();
     for (int i = 1; i < threads; ++i) {
-        helpers.emplace_back([&pos, &gameHistory, maxDepth, &out, i] {
+        helpers.emplace_back([&pos, &gameHistory, maxDepth, &out, &limits, i] {
             t_helper = true;
             g_rng.seed(20260101u + uint32_t(i) * 7919u);
-            (void)runSearch(pos, gameHistory, maxDepth, out);
+            (void)runSearch(pos, gameHistory, maxDepth, out, 1,
+                            limits.restrictRootMoves ? &limits.rootMoves : nullptr);
         });
     }
 
     t_helper = false;
-    result   = runSearch(pos, gameHistory, maxDepth, out, std::clamp(limits.multiPV, 1, 5));
+    result   = runSearch(pos, gameHistory, maxDepth, out, std::clamp(limits.multiPV, 1, 5),
+                         limits.restrictRootMoves ? &limits.rootMoves : nullptr);
 
     g_stop.store(true, std::memory_order_relaxed);
     for (std::thread& helper : helpers)
         helper.join();
     result.nodes = g_nodes.load(std::memory_order_relaxed);
     result.timeMs = elapsedMs();
+    result.openingVariety = limits.openingVariety;
     return result;
 }
 
-void setThreads(int n) { g_threads = std::clamp(n, 0, 64); }
+void setThreads(int n) {
+#ifdef VIRGIN_EMBEDDED
+    (void)n; g_threads = 1;
+#else
+#ifdef VIRGIN_WASM
+    g_threads = std::clamp(n, 0, 4); // Fixed prewarmed browser worker pool.
+#else
+    g_threads = std::clamp(n, 0, 64);
+#endif
+#endif
+}
+#ifdef VIRGIN_EMBEDDED
+void setSearchPoll(void (*poll)()) { g_searchPoll = poll; }
+#endif
 
 int threadCount() { return g_threads > 0 ? g_threads : defaultThreads(); }
 
@@ -1032,6 +1167,101 @@ bool searchRegressionTests(std::ostream& out) {
         out << (ok ? "ok    " : "FAIL  ") << text << '\n';
         passed &= ok;
     };
+    Position endgameProbe;
+    endgameProbe.setFen("8/8/2k5/2b5/K7/3r4/R7/8 b - - 57 87");
+    check(!zugzwangRisk(endgameProbe), "active rook and bishop side keeps normal search pruning");
+    endgameProbe.setFen("8/8/2k5/2b5/K7/3r4/R7/8 w - - 57 87");
+    check(zugzwangRisk(endgameProbe), "lone rook defender receives zugzwang-safe search");
+    endgameProbe.setFen("8/8/4k3/4p3/4K3/8/8/8 w - - 0 1");
+    check(zugzwangRisk(endgameProbe), "pawn opposition endgame disables speculative forward pruning");
+    Position clockPos;
+    clockPos.setFen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1");
+    SearchLimits longClock; longClock.wtime = 7380000; longClock.btime = 7200000;
+    const auto openingTime = allocateTime(clockPos, longClock);
+    check(openingTime.soft <= 1500 && openingTime.hard <= 3000,
+          "BearChess two-hour clock does not allocate minutes to 1...reply");
+    SearchLimits fixedTime; fixedTime.movetime = 1000;
+    const auto fixedBudget = allocateTime(clockPos, fixedTime);
+#ifdef VIRGIN_CORE2
+    check(fixedBudget.soft == 900 && fixedBudget.hard == 1000,
+#else
+    check(fixedBudget.soft == 570 && fixedBudget.hard == 950,
+#endif
+          "fixed one-second search retains its own time budget");
+    longClock.btime = 0;
+    check(allocateTime(clockPos, longClock).hard == 1,
+          "an exhausted clock does not become an unlimited search");
+
+#ifndef VIRGIN_CORE2
+    SearchLimits automatic; automatic.automaticTime=5000;
+    check(allocateTime(clockPos,automatic).hard==4950,"bare go has a five-second maximum minus overhead");
+    automatic.automaticTime=10000;
+    check(allocateTime(clockPos,automatic).hard==9950,"adaptive automatic play can use ten seconds");
+    automatic.movetime=3000;
+    check(allocateTime(clockPos,automatic).hard==2950,"explicit three-second limit overrides automatic ten seconds");
+    automatic.infinite=true;
+    check(allocateTime(clockPos,automatic).hard==0,"infinite analysis never acquires the automatic timer");
+    check(VirginTime::allocate(300000,2000,30,false,0,0,50).soft >
+          VirginTime::allocate(300000,0,30,false,0,0,50).soft,"Fischer increment increases available thinking time");
+    const auto stage=VirginTime::allocate(90000,0,1,false,0,0,50);
+    check(stage.soft>VirginTime::allocate(90000,0,40,false,0,0,50).soft && stage.hard<90000,
+          "last move before a time control can spend more without spending the whole clock");
+    check(VirginTime::allocate(80,10000,0,false,0,0,100).hard==1,
+          "increment does not buy time before the current move is completed");
+    check(VirginTime::allocate(INT64_MAX,INT64_MAX,1,false,0,0,50).hard>0,
+          "huge valid clocks use overflow-safe budget arithmetic");
+    VirginTime::Decision stableTime, unstableTime;
+    stableTime.finish({1000,4000},1,20,1,100,false);
+    unstableTime.finish({1000,4000},1,20,1,100,false);
+    stableTime.finish({1000,4000},1,20,2,200,false);
+    unstableTime.finish({1000,4000},1,20,2,200,false);
+    stableTime.finish({1000,4000},1,20,3,400,false);
+    unstableTime.finish({1000,4000},1,20,3,400,false);
+    check(stableTime.finish({1000,4000},1,20,4,800,false) &&
+          !unstableTime.finish({1000,4000},2,-30,4,800,false),
+          "stable results finish sooner while changed moves and evaluation drops earn time");
+    check(unstableTime.finish({1000,4000},3,-100,5,4000,false),
+          "instability never extends the hard deadline");
+    const auto makeCandidate=[&](const char* sequence,Score score) {
+        SearchCandidate c; c.score=score; Position pos;pos.setFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+        std::istringstream in(sequence);std::string text;
+        while(in>>text){Move m=find_legal_move(pos,text);if(!m)break;c.pv.push_back(m);pos.applyMove(m);}
+        if (!c.pv.empty()) c.move=c.pv.front();
+        return c;
+    };
+    Position opening;opening.setFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    SearchResult ties;ties.depth=6;
+    ties.candidates={makeCandidate("e2e4 e7e5 g1f3 b8c6",20),makeCandidate("d2d4 d7d5 c2c4 e7e6",15)};
+    ties.previousCandidates=ties.candidates;
+    check(chooseOpeningCandidate(opening,ties,0.99)==1 && chooseOpeningCandidate(opening,ties,0.0)==0,
+          "verified near-equal opening moves can vary without an opening book");
+    auto unsafe=ties;unsafe.candidates[1].score=9;
+    check(chooseOpeningCandidate(opening,unsafe,0.99)==0,"eleven-centipawn loss is outside the opening window");
+    unsafe=ties;unsafe.previousCandidates[1].score=0;
+    check(chooseOpeningCandidate(opening,unsafe,0.99)==0,"opening alternative must also be near-equal at the previous depth");
+    unsafe=ties;unsafe.depth=5;
+    check(chooseOpeningCandidate(opening,unsafe,0.99)==0,"shallow opening results do not qualify for random selection");
+    unsafe=ties;unsafe.candidates[1].pv.resize(2);
+    check(chooseOpeningCandidate(opening,unsafe,0.99)==0,"short principal variations cannot qualify as safe alternatives");
+    unsafe=ties;unsafe.candidates[0].score=SCORE_MATE-3;
+    check(chooseOpeningCandidate(opening,unsafe,0.99)==0,"known mates always keep the strongest move");
+    unsafe=ties;
+    unsafe.candidates[0]=makeCandidate("d2d4 d7d5 c2c4 e7e6",20);
+    unsafe.candidates[1]=makeCandidate("e2e4 d7d5 e4e5 d8d7 e5e6 d7e6",15);
+    unsafe.previousCandidates=unsafe.candidates;
+    check(chooseOpeningCandidate(opening,unsafe,0.99)==0,"near-equal scores cannot admit a line that loses a pawn");
+#endif
+
+    EasyMove easyTest;
+    bool clear = false;
+    for (int i = 0; i < 4; ++i) clear = easyTest.update(Move(1), 200 + i, 180, 8 + i, 300, true);
+    check(clear && !easyTest.update(Move(2), 200, 180, 12, 300, true),
+          "early clear-move decision requires stable score and unchanged move");
+    EasyMove closeTest;
+    for (int i = 0; i < 4; ++i) clear = closeTest.update(Move(1), 200, 30, 8 + i, 300, true);
+    check(!clear, "close alternatives do not trigger the clear-move shortcut");
+    g_infinite = false;
+
     Position p;
     p.setFen("7k/5K2/6Q1/8/8/8/8/8 b - - 0 1");
     g_keyHistory = {p.key()};
@@ -1066,6 +1296,38 @@ bool searchRegressionTests(std::ostream& out) {
     g_keyHistory = {p.key()};
     check(is_mate_score(qsearch(p, -SCORE_INFINITE, SCORE_INFINITE, 0)),
           "bounded quiet checks expose mate at a quiescence leaf");
+    TT.clear(); g_stop.store(false); g_keyHistory = {p.key()};
+    const Score standPat = evaluate(p);
+    check(is_mate_score(qsearch(p, -SCORE_INFINITE, Score(standPat + 1), 0)),
+          "PV quiet mate survives stand pat narrowing its window to one centipawn");
+#ifndef VIRGIN_CORE2
+    Position castleProbe;
+    castleProbe.setFen("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1");
+    check(tacticalQuiet(castleProbe,find_legal_move(castleProbe,"e1g1")) &&
+          tacticalQuiet(castleProbe,find_legal_move(castleProbe,"e1c1")),
+          "legal castling is protected from quiet move pruning");
+#endif
+    {
+        const int savedThreads = g_threads; setThreads(1);
+        Position root; root.setFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+        SearchLimits restricted;restricted.depth=4;restricted.restrictRootMoves=true;
+        restricted.rootMoves={find_legal_move(root,"e2e4")};
+        TT.clear();newSearchGame();std::ostringstream sink;
+        const SearchResult one=searchPosition(root,restricted,{},sink);
+        check(one.best==restricted.rootMoves[0] && one.depth==4,
+              "one searchmoves candidate is analysed to depth, not treated as forced play");
+        restricted.rootMoves.push_back(find_legal_move(root,"d2d4"));restricted.multiPV=2;
+        TT.clear();newSearchGame();const auto two=searchPosition(root,restricted,{},sink);
+        check(two.candidates.size()==2 && two.candidates[0].move!=two.candidates[1].move &&
+              std::all_of(two.candidates.begin(),two.candidates.end(),[&](const auto& c){
+                  return std::find(restricted.rootMoves.begin(),restricted.rootMoves.end(),c.move)!=restricted.rootMoves.end();
+              }),"MultiPV respects the allowed root moves");
+        restricted.rootMoves.clear();TT.clear();newSearchGame();
+        check(searchPosition(root,restricted,{},sink).best==0,
+              "empty searchmoves list cannot fall back to unrestricted play");
+        setThreads(savedThreads);
+    }
+
 
     {
         const int savedThreads = g_threads;
@@ -1154,4 +1416,46 @@ bool searchRegressionTests(std::ostream& out) {
     g_keyHistory.clear();
     g_strength = savedStrength;
     return passed;
+}
+size_t chooseOpeningCandidate(const Position& root, const SearchResult& result, double pick) {
+#ifdef VIRGIN_CORE2
+    (void)root; (void)result; (void)pick; return 0;
+#else
+    const auto& current = result.candidates;
+    const auto& previous = result.previousCandidates;
+    if (root.fullmoveNumber() > 4 || root.inCheck() || result.depth < 6 ||
+        current.size() < 2 || previous.size() < 2 || !std::isfinite(pick)) return 0;
+    if (is_mate_score(current[0].score) || is_mate_score(previous[0].score) ||
+        current[0].score < -75 || previous[0].score < -75) return 0;
+    const auto material = [](const Position& pos, Color us) {
+        constexpr int values[] = {100,320,330,500,900,0};
+        int value = 0;
+        for (int type=PAWN; type<KING; ++type)
+            value += values[type] * (popcount(pos.pieces(us,PieceType(type))) -
+                                     popcount(pos.pieces(~us,PieceType(type))));
+        return value;
+    };
+    const int before = material(root,root.sideToMove());
+    size_t pool[5] = {0}; size_t count = 1;
+    for (size_t i=1;i<current.size() && i<5;++i) {
+        const auto& candidate = current[i];
+        const auto old = std::find_if(previous.begin(),previous.end(),[&](const auto& c){return c.move==candidate.move;});
+        if (old==previous.end() || is_mate_score(candidate.score) || is_mate_score(old->score) ||
+            candidate.score > current[0].score || old->score > previous[0].score ||
+            current[0].score-candidate.score>10 || previous[0].score-old->score>10 ||
+            std::abs(candidate.score-old->score)>25 || candidate.score < -75 ||
+            (current[0].score>=0 && candidate.score<0) || candidate.pv.size()<4 ||
+            candidate.pv.front()!=candidate.move) continue;
+        Position pos = root; bool safe = true;
+        for (size_t ply=0;ply<std::min<size_t>(6,candidate.pv.size());++ply) {
+            const Move move = candidate.pv[ply];
+            if (find_legal_move(pos,move_to_uci(move))!=move) {safe=false;break;}
+            pos.applyMove(move);
+            if ((ply&1) && material(pos,root.sideToMove())<before) {safe=false;break;}
+        }
+        if (safe) pool[count++] = i;
+    }
+    const size_t index = std::min(count-1,size_t(std::clamp(pick,0.0,1.0)*count));
+    return pool[index];
+#endif
 }

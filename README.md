@@ -4,6 +4,24 @@
 
 # Virgin
 
+## Virgin 0.8.5 Beta
+
+Version **0.8.5**, 7 November 2026, adds an optional live game-performance display.
+Enable `LivePerformance` (automatic in Adaptive) and send `performance` to read
+the values for both colours. This describes the current game, not a calibrated
+FIDE rating. See [the integration guide](docs/APP_PERFORMANCE_0.8.5.md).
+
+Ready-to-use files: **[dist/virgin-0.8.5-20261107](dist/virgin-0.8.5-20261107)**.
+Includes Windows x64 EXE/DLL, Android AAR/JNI/UCI for four ABIs, WebAssembly,
+three ESP32-S3 profiles, and static Linux x64, ARMv6 and ARMv7 UCI engines.
+Files are provided directly in platform folders, without a ZIP or APK.
+Validation and hardware-test limits are documented in the
+[release notes](docs/RELEASE_0.8.5.md) and version manifest.
+
+The tuned `adaptive_params.h` remains private under the existing repository policy;
+see [public source notes](dist/virgin-0.8.5-20261107/PUBLIC_SOURCE_NOTES.md).
+
+
 **A UCI chess engine built for bots.**
 
 Virgin is an aggressive, independent tactician; its strategic reliability still varies. That is the character it ships with, and it is the reason the engine exists: every part of its evaluation can be steered from the outside, so you can shape that character into many different opponents.
@@ -11,7 +29,7 @@ Virgin is an aggressive, independent tactician; its strategic reliability still 
 * **Make your own bots.** A bot is a playing strength combined with a playing style. Virgin ships a catalogue of **215 ready-made bots** (43 strength levels x 5 styles), and you can define as many more as you like with a plain text file.
 * **Every weight is adjustable.** About 90 evaluation weights are exposed as UCI options and in one weights file. No NNUE, no opaque network: you can read, change and reload each value.
 * **One small file.** C++20, no external libraries. The Windows binary is under 500 KB, the static Android binary under 1 MB.
-* **Windows and Android** from the same code base (Android: arm64-v8a, armeabi-v7a, x86_64).
+* **Windows, Android, Linux, WebAssembly and ESP32-S3** from a shared C++ core. Android includes arm64-v8a, armeabi-v7a, x86_64 and x86.
 * **Plain UCI.** Works with any UCI host: BearChess, Arena, Cute Chess, your own app.
 
 ## The five styles

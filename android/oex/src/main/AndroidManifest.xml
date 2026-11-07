@@ -1,0 +1,11 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="de.dirksommerfeld.virgin.oex" android:versionCode="80501" android:versionName="0.8.5">
+ <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="36"/>
+ <application android:label="Virgin 0.8.5 OEX" android:icon="@drawable/engine_icon" android:theme="@android:style/Theme.Material.NoActionBar" android:allowBackup="false" android:extractNativeLibs="true" android:usesCleartextTraffic="false">
+  <activity android:name=".MainActivity" android:exported="true">
+   <intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter>
+   <intent-filter><action android:name="intent.chess.provider.ENGINE"/><category android:name="android.intent.category.DEFAULT"/></intent-filter>
+   <meta-data android:name="chess.provider.engine.authority" android:value="de.dirksommerfeld.virgin.oex.engines"/>
+  </activity>
+  <provider android:name=".EngineProvider" android:authorities="de.dirksommerfeld.virgin.oex.engines" android:exported="true" android:grantUriPermissions="true"/>
+ </application>
+</manifest>

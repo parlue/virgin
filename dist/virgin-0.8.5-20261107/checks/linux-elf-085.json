@@ -1,0 +1,26 @@
+[
+  {
+    "architecture": "x86_64",
+    "bytes": 1109968,
+    "machine": 62,
+    "static": true,
+    "elf_check": "PASS",
+    "hardware_run": true
+  },
+  {
+    "architecture": "armv6",
+    "bytes": 1010712,
+    "machine": 40,
+    "static": true,
+    "elf_check": "PASS",
+    "hardware_run": false
+  },
+  {
+    "architecture": "armv7",
+    "bytes": 1012148,
+    "machine": 40,
+    "static": true,
+    "elf_check": "PASS",
+    "hardware_run": false
+  }
+]

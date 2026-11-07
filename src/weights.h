@@ -64,6 +64,7 @@ void refresh_eval_weights();
 struct TermWeights {
     int mobility[4];  // KNIGHT, BISHOP, ROOK, QUEEN
 
+    int pawnStorm;
     int attackUnits, saturation, shieldMissing, shieldPawn;
     int openFileNearKing, semiOpenNearKing;
     int tropismN, tropismB, tropismR, tropismQ, safeCheck, uncastledMg, kingRingAttack;
@@ -88,6 +89,7 @@ struct TermWeights {
     int complexityWeight;
 
     int drawishOppositeBishops, drawishInsufficient;
+    int drawishRookMinorVsRook, drawishRookVsMinor, drawishTwoKnights;
 
     int endgameKingActivity, endgamePassedKingProximity;
 };

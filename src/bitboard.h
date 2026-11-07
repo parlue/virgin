@@ -3,6 +3,7 @@
 #pragma once
 
 #include "types.h"
+#include <array>
 
 #if defined(_MSC_VER)
 #  include <intrin.h>
@@ -32,8 +33,13 @@ constexpr Bitboard LightSquares = ~DarkSquares;
 extern Bitboard PawnAttacks[COLOR_NB][SQUARE_NB];
 extern Bitboard KnightAttacks[SQUARE_NB];
 extern Bitboard KingAttacks[SQUARE_NB];
+#ifdef VIRGIN_EMBEDDED
+extern const std::array<std::array<Bitboard, 64>, 64> BetweenBB;
+extern const std::array<std::array<Bitboard, 64>, 64> LineBB;
+#else
 extern Bitboard BetweenBB[SQUARE_NB][SQUARE_NB];
 extern Bitboard LineBB[SQUARE_NB][SQUARE_NB];
+#endif
 
 // ------------------------------------------------------------ single bits
 inline Bitboard square_bb(Square s) { return 1ULL << int(s); }

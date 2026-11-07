@@ -45,7 +45,7 @@ std::vector<int>                   eloLevels();
 
 EloHandicap eloHandicap(int elo);
 
-// Bot identification: "v<elo>-<style>", e.g. "v1200-stier".
+// Bot identification: "v<elo>-<style>", e.g. "v1200-thunder".
 std::string              botId(int elo, const std::string& styleId);
 const StyleDef*          findStyle(const std::string& idOrName);
 const StyleDef*          styleFromBotId(const std::string& botId);
@@ -57,7 +57,7 @@ std::string              botTags(const StyleDef& style);
 // style overrides. This is what setoption name Style/Bot does.
 bool applyStyle(const std::string& idOrName);
 
-// Boldness in tenths (10 = furchtsam ... 50 = stier). Values in between are
+// Boldness in tenths (10 = Fortress ... 50 = Thunder). Values in between are
 // interpolated between the two neighbouring style profiles.
 bool applyBoldness(int boldnessTenths);
 

@@ -1,6 +1,7 @@
 // Virgin - UCI chess engine
 // Self test and self play implementation.
 #include "selftest.h"
+#include "embedded_config.h"
 #include "adaptive.h"
 
 #include "bitboard.h"
@@ -501,10 +502,14 @@ int runSelfTest(const std::string& dataDir, std::ostream& out) {
         // entries is the largest power of two that fits into the requested size.
         // With a 16 byte entry that is 2^21 at 32 MB - twice as many as with the
         // previous 24 byte layout. The check pins that invariant down.
+#ifdef VIRGIN_EMBEDDED
+        const size_t wantEntries = size_t(VIRGIN_EMBEDDED_HASH_KIB) * 1024 / sizeof(TTEntry);
+#else
         const size_t wantEntries = size_t(32) * 1024 * 1024 / sizeof(TTEntry);
-        check(TT.sizeMb() > 0 && TT.hashfull() >= 0 && sizeof(TTEntry) == 16
+#endif
+        check(TT.entries() > 0 && TT.hashfull() >= 0 && sizeof(TTEntry) == 16
                   && TT.entries() == wantEntries,
-              "transposition table is active (" + std::to_string(TT.sizeMb()) + " MB, "
+              "transposition table is active (" + std::to_string(TT.entries() * sizeof(TTEntry) / 1024) + " KiB, "
                   + std::to_string(TT.entries()) + " entries of "
                   + std::to_string(sizeof(TTEntry)) + " bytes)");
         newSearchGame();
@@ -520,8 +525,8 @@ int runSelfTest(const std::string& dataDir, std::ostream& out) {
         };
 
         const EvalBreakdown knight = evalOf("4k3/8/8/8/8/8/8/N3K3 w - - 0 1");
-        // The material values are calibrated from the outside, so the
-        // bounds follow the registry instead of fixed
+        // The material values are calibrated from the outside (see
+        // docs/NOTES.md), so the bounds follow the registry instead of fixed
         // numbers - the check only verifies that material is reported.
         const int knightEg = weight_value("Material.Knight.Eg");
         const int knightMg = weight_value("Material.Knight.Mg");
@@ -611,7 +616,7 @@ int runSelfTest(const std::string& dataDir, std::ostream& out) {
         check(ok, "direct tactical generator and fast legal witness match complete generation");
     }
 
-    // Replay a full reference game, rather than baking its preferred
+    // Replay the user's full Carballo game, rather than baking its preferred
     // root moves into a brittle tactical test.
     {
         reset_weights();
@@ -639,9 +644,9 @@ int runSelfTest(const std::string& dataDir, std::ostream& out) {
             if (ply == 31)
                 safetyAfterG3 = -evaluateDetailed(p).term[3];
         }
-        check(ok && ply == 65, "all 65 plies of the reference game replay with consistent board and EP state");
+        check(ok && ply == 65, "all 65 plies of Carballo game replay with consistent board and EP state");
         check(safetyAfterG3 < safetyBeforeG3,
-              "16.g3 weakens king safety in the supplied position");
+              "16.g3 weakens king safety in the supplied Carballo position");
         check(weight_value("Group.Material") == 100 && weight_value("Group.KingSafety") >= 100,
               "competitive attack profile retains full material and king safety knowledge");
         reset_weights();

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<engines>
+ <engine name="Virgin 0.8.5" filename="libvirgin-arm64-v8a.so" target="arm64-v8a"/>
+ <engine name="Virgin 0.8.5" filename="libvirgin-armeabi-v7a.so" target="armeabi-v7a"/>
+ <engine name="Virgin 0.8.5" filename="libvirgin-x86_64.so" target="x86_64"/>
+ <engine name="Virgin 0.8.5" filename="libvirgin-x86.so" target="x86"/>
+</engines>

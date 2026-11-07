@@ -1,7 +1,7 @@
 // Virgin - UCI chess engine
 // Tapered evaluation. Milestone 1 wires material, piece square shapes and
 // tempo; the remaining groups are registered and reported but become active
-// in later milestones.
+// in later milestones (see docs/ROADMAP.md).
 #pragma once
 
 #include <iosfwd>

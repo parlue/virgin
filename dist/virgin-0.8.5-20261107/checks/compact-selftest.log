@@ -1,0 +1,153 @@
+data dir: data
+
+ok    perft startpos d1 = 20
+ok    perft startpos d2 = 400
+ok    perft startpos d3 = 8902
+ok    perft startpos d4 = 197281
+ok    perft startpos d5 = 4865609
+ok    perft kiwipete d1 = 48
+ok    perft kiwipete d2 = 2039
+ok    perft kiwipete d3 = 97862
+ok    perft kiwipete d4 = 4085603
+ok    perft endgame3 d1 = 14
+ok    perft endgame3 d2 = 191
+ok    perft endgame3 d3 = 2812
+ok    perft endgame3 d4 = 43238
+ok    perft endgame3 d5 = 674624
+ok    perft promotion4 d1 = 6
+ok    perft promotion4 d2 = 264
+ok    perft promotion4 d3 = 9467
+ok    perft promotion4 d4 = 422333
+ok    perft position5 d1 = 44
+ok    perft position5 d2 = 1486
+ok    perft position5 d3 = 62379
+ok    perft position5 d4 = 2103487
+ok    perft position6 d1 = 46
+ok    perft position6 d2 = 2079
+ok    perft position6 d3 = 89890
+ok    perft position6 d4 = 3894594
+ok    board sanity + Zobrist key over 200 plies
+ok    evaluation is colour symmetric (eval(pos) == eval(mirror(pos)))
+ok    weight names are unique (95 parameters)
+ok    every default lies inside min..max
+ok    weight_value(name) returns the registry default
+ok    move encoding round trip (all squares and promotions)
+ok    move list replay: e1g1 castles (king g1, rook f1)
+ok    move list replay: e5d6 takes en passant (d5 empty)
+ok    five style profiles (5)
+ok    43 Elo levels 700..2800 step 50 (43)
+ok    bot catalog size = styles x levels (215)
+ok    bot ids resolve back to Elo level and style
+ok    Elo handicap is monotone (stronger level never gets weaker limits)
+ok    data/bots.txt contains 215 bots (expected 215)
+ok    data/styles.txt is readable
+ok    data/elo_profile.txt is readable
+ok    data/weights_default.txt is readable
+ok    applyStyle sets the style weights and restores the neutral baseline
+ok    SEE: a free pawn is worth a pawn
+ok    SEE: a defended pawn is an even trade
+ok    SEE: a hanging queen is captured
+ok    SEE excludes a pinned knight and an illegal king recapture on h7
+ok    SEE values an unrecaptured en passant pawn correctly
+ok    SEE accounts for promotion followed by rook recapture
+ok    between squares exclude both endpoints
+ok    bishop cannot pin along a file
+ok    rook recognises a single blocker pinned to the king
+ok    K+B v K is dead
+ok    same coloured bishops without pawns are dead
+ok    B v N is not automatically a dead position
+ok    adaptive opening keeps the best candidate
+ok    adaptive equalisation selects the candidate nearest the player target
+ok    adaptive hold remains sticky
+ok    adaptive grace period preserves full-strength moves
+ok    adaptive chooser regressions
+ok    active rook and bishop side keeps normal search pruning
+ok    lone rook defender receives zugzwang-safe search
+ok    pawn opposition endgame disables speculative forward pruning
+ok    BearChess two-hour clock does not allocate minutes to 1...reply
+ok    fixed one-second search retains its own time budget
+ok    an exhausted clock does not become an unlimited search
+ok    bare go has a five-second maximum minus overhead
+ok    adaptive automatic play can use ten seconds
+ok    explicit three-second limit overrides automatic ten seconds
+ok    infinite analysis never acquires the automatic timer
+ok    Fischer increment increases available thinking time
+ok    last move before a time control can spend more without spending the whole clock
+ok    increment does not buy time before the current move is completed
+ok    huge valid clocks use overflow-safe budget arithmetic
+ok    stable results finish sooner while changed moves and evaluation drops earn time
+ok    instability never extends the hard deadline
+ok    verified near-equal opening moves can vary without an opening book
+ok    eleven-centipawn loss is outside the opening window
+ok    opening alternative must also be near-equal at the previous depth
+ok    shallow opening results do not qualify for random selection
+ok    short principal variations cannot qualify as safe alternatives
+ok    known mates always keep the strongest move
+ok    near-equal scores cannot admit a line that loses a pawn
+ok    early clear-move decision requires stable score and unchanged move
+ok    close alternatives do not trigger the clear-move shortcut
+ok    quiescence detects stalemate before stand pat
+ok    checkmate takes precedence over the 50 move clock
+ok    quiescence searches a quiet promotion
+ok    main search respects its stack boundary
+ok    losing captures sort behind quiet moves
+ok    history saturates without wrapping negative
+ok    quiescence sees mate through a nominally defended checking capture
+ok    bounded quiet checks expose mate at a quiescence leaf
+ok    PV quiet mate survives stand pat narrowing its window to one centipawn
+ok    legal castling is protected from quiet move pruning
+ok    one searchmoves candidate is analysed to depth, not treated as forced play
+ok    MultiPV respects the allowed root moves
+ok    empty searchmoves list cannot fall back to unrestricted play
+ok    five same-depth root candidates agree with independent full-window searches
+ok    narrow aspiration PVS agrees with exhaustive full-window root search
+ok    searched principal variations replay legally and begin with bestmove
+ok    historical twofold is not an immediately claimable draw
+ok    a cycle back to the search root terminates the line
+ok    three actual occurrences are recognised
+ok    repetition cannot cross a null move boundary
+ok    search boundary and move ordering regressions
+ok    shared TT snapshots remain coherent under four colliding writers
+ok    TT retains four colliding full keys in one bucket
+ok    leaf entries preserve deeper current-generation results
+ok    aged bucket replaces its least valuable entry
+ok    TT mate distance adjusts between root plies
+ok    search finds mate in 1 (Ra8#), score 30999
+ok    search captures the hanging queen (e4d5)
+ok    transposition table is active (32 KiB, 2048 entries of 16 bytes)
+ok    eval material: extra knight = 377 cp
+ok    eval pawns: doubled (-9) < connected (8)
+ok    eval passed pawn: rank 6 (68) > rank 4 (7), endgame 15
+ok    eval king safety: uncastled black king = -62
+ok    eval mobility: corner knight (-8) < active knight (-4)
+ok    eval drawish: KvK = 0
+ok    eval drawish: opposite bishops scaled 15 < unscaled 26
+ok    a pinned g2 pawn does not provide usable defence of h3
+ok    pinned pawn retains geometric king exclusion attacks
+ok    pinned rook mobility stays on the pin line
+ok    absolutely pinned knight has no usable mobility
+ok    a diagonally pinned pawn may capture its pinner along the pin line
+ok    an active bishop does not hide a second bishop trapped behind its pawns
+ok    a pawn-attacked bishop recognises exits covered by an enemy knight
+ok    a free promotion path is worth more than a blocked passed pawn
+ok    a rear doubled pawn is not counted as a second passer
+ok    RB versus R from calibration has modest winning chances, not a five-pawn bonus
+ok    bishop and knight versus bare king retains winning material
+ok    rook versus bare king is not scaled as drawish
+ok    wrong bishop rook pawn fortress on the promotion corner is recognised
+ok    lazy material cannot bypass a recognised fortress
+ok    correct-colour bishop is not mistaken for a rook-pawn fortress
+ok    an approaching enemy pawn storm increases king danger before contact
+ok    queen and rook attack retains king danger into the endgame phase
+ok    usable defence and absolute pin regressions
+ok    direct tactical generator and fast legal witness match complete generation
+ok    all 65 plies of Carballo game replay with consistent board and EP state
+ok    16.g3 weakens king safety in the supplied Carballo position
+ok    competitive attack profile retains full material and king safety knowledge
+ok    all 63 plies of the second user game replay legally
+ok    second PGN final position has two occurrences, not three
+ok    second PGN retains both rook pairs; White is down two pawns
+ok    Android loss 1 replays legally through its final checkmate
+ok    Android loss 2 replays legally through its final checkmate
+
+RESULT: PASSED

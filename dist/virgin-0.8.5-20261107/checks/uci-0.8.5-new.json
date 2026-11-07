@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "checks": [
+    "0.8.5 identity and MultiPV option",
+    "Restricted MultiPV legal and distinct with 1 threads; limits after searchmoves parsed",
+    "Restricted MultiPV legal and distinct with 4 threads; limits after searchmoves parsed",
+    "Single candidate reaches requested depth",
+    "Duplicate/illegal candidate cannot escape allowed list",
+    "Empty legal candidate list returns no move",
+    "MultiPV clamps to five",
+    "Adaptive respects restricted root set",
+    "Restricted infinite search stops responsively"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "passed": [
+    "Adaptive advertised as independent check option",
+    "All conflicting options ignored; effective weights and evaluation unchanged",
+    "Five complete legal same-depth candidates, full speed despite Elo 700 settings",
+    "Repeated analysis does not fabricate a player accuracy sample",
+    "Player move measured once; ucinewgame resets the complete adaptive state",
+    "Ignored options do not stop a running adaptive search; stop stays responsive",
+    "One-second adaptive searches stay within time: [953, 875] ms; every PV legal",
+    "A single legal root move forms a valid one-candidate batch",
+    "Disabling restores weights, knowledge and the prior Elo handicap",
+    "Terminal positions return 0000 safely"
+  ]
+}

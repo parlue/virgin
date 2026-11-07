@@ -621,6 +621,26 @@ void evalSide(const Position& pos, const EvalContext& ctx, Color col, const int 
             t.mg[T_KINGSAFETY] += TW.shieldMissing
                 + (TW.shieldPawn - TW.shieldMissing) * shieldQuality / 100;
 
+            // The nearest enemy pawn in front of the king can open the
+            // shelter before a piece attack reaches the adjacent king ring.
+            const int kingRank = rank_of(ksq);
+            const Bitboard frontRanks = col == WHITE
+                ? (kingRank == 7 ? 0 : (~0ULL << ((kingRank + 1) * 8)))
+                : ((1ULL << (kingRank * 8)) - 1);
+            const Bitboard stormPawns = pos.pieces(opp, PAWN) & file_bb(f) & frontRanks;
+            const Square nearestPawn = stormPawns
+                ? (col == WHITE ? lsb_square(stormPawns) : msb_square(stormPawns)) : SQ_NONE;
+            const int nearest = stormPawns ? rank_distance(ksq, nearestPawn) : 8;
+            if (nearest <= 4) {
+                const int relativeRank = col == WHITE ? rank_of(ksq) + nearest
+                                                      : rank_of(ksq) - nearest;
+                const Square pawn = make_square(f, relativeRank);
+                const Square front = Square(int(pawn) + (opp == WHITE ? 8 : -8));
+                const bool blocked = is_ok(front) && pos.pieceOn(front) == make_piece(col, PAWN);
+                const int proximity = 5 - nearest;
+                t.mg[T_KINGSAFETY] += TW.pawnStorm * proximity * proximity / (blocked ? 8 : 4);
+            }
+
             const Bitboard filePawns = pos.pieces(PAWN) & file_bb(f);
             if (filePawns == 0)
                 t.mg[T_KINGSAFETY] += TW.openFileNearKing;
@@ -642,6 +662,12 @@ void evalSide(const Position& pos, const EvalContext& ctx, Color col, const int 
         const bool homeKing = (ksq == (col == WHITE ? SQ_E1 : SQ_E8));
         if (homeKing && (pos.castlingRights() & myRights))
             t.mg[T_KINGSAFETY] += TW.uncastledMg;
+
+        // A queen plus a supporting piece still threatens mate after other
+        // material has been exchanged. Do not taper all shelter danger away.
+        if (pos.pieces(opp, QUEEN)
+            && (pos.pieces(opp, KNIGHT) | pos.pieces(opp, BISHOP) | pos.pieces(opp, ROOK)))
+            t.eg[T_KINGSAFETY] += t.mg[T_KINGSAFETY] / 3;
     }
 
     // ------------------------------------------------------------ endgame
@@ -726,6 +752,42 @@ bool oppositeBishopsOnly(const Position& pos) {
     return whiteDark != blackDark;
 }
 
+// Material-specific winning chances, not a declaration of a dead draw.
+// Only reduce the score of the side the evaluation currently favours: a
+// hanging rook must still be refuted by search, and mates bypass static eval.
+int materialWinningScale(const Position& pos, Score score) {
+    const Color strong = score >= 0 ? pos.sideToMove() : ~pos.sideToMove();
+    const Color weak = ~strong;
+    const int sr = popcount(pos.pieces(strong, ROOK));
+    const int wr = popcount(pos.pieces(weak, ROOK));
+    const int sb = popcount(pos.pieces(strong, BISHOP));
+    const int sn = popcount(pos.pieces(strong, KNIGHT));
+    const int wm = popcount(pos.pieces(weak, BISHOP) | pos.pieces(weak, KNIGHT));
+    if (!pos.pieces(PAWN) && !pos.pieces(QUEEN)) {
+        if (sr == 1 && wr == 1 && sb + sn == 1 && wm == 0)
+            return TW.drawishRookMinorVsRook;
+        if (sr == 1 && wr == 0 && sb + sn == 0 && wm == 1)
+            return TW.drawishRookVsMinor;
+        if (sr == 0 && wr == 0 && sb == 0 && sn == 2 && wm == 0)
+            return TW.drawishTwoKnights;
+    }
+    // Wrong-colour bishop and rook pawns versus a bare king already on the
+    // promotion corner. Other pawn files or extra pieces invalidate the rule.
+    if (!pos.pieces(QUEEN) && sr == 0 && wr == 0 && sn == 0 && sb == 1
+        && wm == 0 && !pos.pieces(weak, PAWN) && pos.pieces(strong, PAWN)) {
+        const Bitboard pawns = pos.pieces(strong, PAWN);
+        for (int file : {0, 7}) {
+            if (pawns & ~file_bb(file)) continue;
+            const Square corner = make_square(file, strong == WHITE ? 7 : 0);
+            const bool bishopDark = (pos.pieces(strong, BISHOP) & DarkSquares) != 0;
+            const bool cornerDark = (square_bb(corner) & DarkSquares) != 0;
+            if (bishopDark != cornerDark && pos.kingSquare(weak) == corner)
+                return 0;
+        }
+    }
+    return 100;
+}
+
 }  // namespace
 
 static_assert(TERM_NB == EVAL_TERM_NB, "term count mismatch");
@@ -795,6 +857,7 @@ EvalBreakdown evaluateDetailed(const Position& pos) {
         scale = std::min(scale, TW.drawishOppositeBishops);
     else if (insufficientMaterial(pos))
         scale = TW.drawishInsufficient;
+    scale = std::min(scale, materialWinningScale(pos, total));
     if (scale != 100)
         total = Score(total * std::max(0, scale) / 100);
 
@@ -859,6 +922,8 @@ Score evaluateLazy(const Position& pos, Score alpha, Score beta) {
     // is already outside the window the expensive part cannot change it.
     constexpr Score LAZY_MARGIN = 400;
 
+    if (!pos.pieces(QUEEN) || popcount(pos.pieces(QUEEN)) == 1)
+        return evaluate(pos);
     const Score material = evaluateMaterial(pos);
     if (material - LAZY_MARGIN >= beta || material + LAZY_MARGIN <= alpha)
         return material;
@@ -924,5 +989,26 @@ bool evaluationRegressionTests(std::ostream& out) {
     ctx = buildContext(p);
     check(ctx.passed[WHITE] == square_bb(SQ_D6),
           "a rear doubled pawn is not counted as a second passer");
+    p.setFen("8/8/2k5/2b5/K7/3r4/R7/8 b - - 57 87");
+    check(evaluate(p) > 0 && evaluate(p) < 120,
+          "RB versus R from calibration has modest winning chances, not a five-pawn bonus");
+    p.setFen("7k/8/5K2/8/8/8/8/1NB5 w - - 0 1");
+    check(evaluate(p) > 500, "bishop and knight versus bare king retains winning material");
+    p.setFen("7k/8/5K2/8/8/8/8/1R6 w - - 0 1");
+    check(evaluate(p) > 400, "rook versus bare king is not scaled as drawish");
+    p.setFen("k7/P7/2K5/8/8/8/8/2B5 w - - 0 1");
+    check(evaluate(p) == 0, "wrong bishop rook pawn fortress on the promotion corner is recognised");
+    check(evaluateLazy(p, 1000, 1001) == 0,
+          "lazy material cannot bypass a recognised fortress");
+    p.setFen("k7/P7/2K5/8/8/8/8/1B6 w - - 0 1");
+    check(evaluate(p) > 300, "correct-colour bishop is not mistaken for a rook-pawn fortress");
+    const SideTerms nearStorm = terms("3q2k1/5p2/8/8/6p1/8/5PPP/3Q2K1 w - - 0 1");
+    const SideTerms distantStorm = terms("3q2k1/5pp1/8/8/8/8/5PPP/3Q2K1 w - - 0 1");
+    check(nearStorm.mg[T_KINGSAFETY] < distantStorm.mg[T_KINGSAFETY],
+          "an approaching enemy pawn storm increases king danger before contact");
+    const SideTerms queenAttack = terms("6k1/8/8/8/8/3q4/8/3r2K1 w - - 0 1");
+    const SideTerms noQueen = terms("6k1/8/8/8/8/8/8/3r2K1 w - - 0 1");
+    check(queenAttack.eg[T_KINGSAFETY] < noQueen.eg[T_KINGSAFETY],
+          "queen and rook attack retains king danger into the endgame phase");
     return passed;
 }

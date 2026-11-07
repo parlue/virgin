@@ -9,7 +9,11 @@
 TranspositionTable TT;
 
 void TranspositionTable::resize(size_t megabytes) {
-    const size_t bytes = std::max<size_t>(megabytes, 1) * 1024 * 1024;
+    resizeKiB(std::max<size_t>(megabytes, 1) * 1024);
+}
+
+void TranspositionTable::resizeKiB(size_t kilobytes) {
+    const size_t bytes = std::max<size_t>(kilobytes, 1) * 1024;
     const size_t count = std::max<size_t>(bytes / sizeof(TTEntry), 1024);
 
     // Round down to a power of two so that indexing is a simple mask.
@@ -102,4 +106,8 @@ int TranspositionTable::hashfull() const {
             ++used;
     }
     return int(used * 1000 / int(sample));
+}
+
+void TranspositionTable::release() {
+    std::vector<TTEntry>().swap(table); entryMask = 0; generation = 0;
 }

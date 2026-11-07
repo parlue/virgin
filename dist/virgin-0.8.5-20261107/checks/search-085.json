@@ -1,0 +1,147 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "case": "0.8.5 UCI identity and timing safety option"
+    },
+    {
+      "case": "automatic play budget",
+      "adaptive": false,
+      "ms": 4094,
+      "best": "e7e5"
+    },
+    {
+      "case": "explicit three seconds overrides automatic budget",
+      "adaptive": false,
+      "ms": 2937,
+      "best": "d7d5"
+    },
+    {
+      "case": "5+2 clock keeps opening quick",
+      "adaptive": false,
+      "ms": 1406,
+      "best": "d7d5"
+    },
+    {
+      "case": "empty/negative explicit limits remain bounded",
+      "adaptive": false,
+      "command": "go wtime 0 btime 0",
+      "ms": 0
+    },
+    {
+      "case": "empty/negative explicit limits remain bounded",
+      "adaptive": false,
+      "command": "go wtime -1 btime -1",
+      "ms": 0
+    },
+    {
+      "case": "empty/negative explicit limits remain bounded",
+      "adaptive": false,
+      "command": "go movetime 0",
+      "ms": 15
+    },
+    {
+      "case": "empty/negative explicit limits remain bounded",
+      "adaptive": false,
+      "command": "go nodes 0",
+      "ms": 0
+    },
+    {
+      "case": "automatic play budget",
+      "adaptive": true,
+      "ms": 8297,
+      "best": "e7e5"
+    },
+    {
+      "case": "explicit three seconds overrides automatic budget",
+      "adaptive": true,
+      "ms": 2250,
+      "best": "e7e5"
+    },
+    {
+      "case": "5+2 clock keeps opening quick",
+      "adaptive": true,
+      "ms": 3062,
+      "best": "d7d5"
+    },
+    {
+      "case": "empty/negative explicit limits remain bounded",
+      "adaptive": true,
+      "command": "go wtime 0 btime 0",
+      "ms": 0
+    },
+    {
+      "case": "empty/negative explicit limits remain bounded",
+      "adaptive": true,
+      "command": "go wtime -1 btime -1",
+      "ms": 0
+    },
+    {
+      "case": "empty/negative explicit limits remain bounded",
+      "adaptive": true,
+      "command": "go movetime 0",
+      "ms": 0
+    },
+    {
+      "case": "empty/negative explicit limits remain bounded",
+      "adaptive": true,
+      "command": "go nodes 0",
+      "ms": 62
+    },
+    {
+      "case": "Move Overhead remains available in Adaptive"
+    },
+    {
+      "case": "clock/time-control deadline",
+      "command": "go wtime 1000 btime 1000 winc 2000 binc 2000",
+      "ms": 406,
+      "best": "d3d4"
+    },
+    {
+      "case": "clock/time-control deadline",
+      "command": "go wtime 1500 btime 1500 movestogo 1",
+      "ms": 1000,
+      "best": "d3d4"
+    },
+    {
+      "case": "infinite analysis stays live and stop is responsive"
+    },
+    {
+      "case": "forced move returned immediately",
+      "ms": 0,
+      "best": "h8h7"
+    },
+    {
+      "case": "opening choices remain legal and can vary only through guarded selection",
+      "choices": {
+        "e2e4": [
+          "d7d5",
+          "e7e5",
+          "d7d5",
+          "e7e5",
+          "e7e5",
+          "e7e5",
+          "e7e5",
+          "e7e5"
+        ],
+        "d2d4": [
+          "g8f6",
+          "g8f6",
+          "g8f6",
+          "d7d5",
+          "d7d5",
+          "d7d5",
+          "g8f6",
+          "g8f6"
+        ]
+      },
+      "varied": 1
+    },
+    {
+      "case": "fixed-depth analysis does not use opening randomisation"
+    },
+    {
+      "case": "Elo bot keeps its original search/handicap path"
+    }
+  ]
+}
