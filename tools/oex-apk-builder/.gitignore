@@ -1,0 +1,4 @@
+private/
+dist/
+__pycache__/
+*.jks

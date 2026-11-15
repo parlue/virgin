@@ -1,0 +1,12 @@
+﻿{
+    "complete":  215,
+    "total":  215,
+    "active":  0,
+    "failed":  [
+
+               ],
+    "status":  "complete",
+    "automatic_resume_scheduled":  false,
+    "completed_at":  "2026-11-01T17:57:13.5052085+01:00",
+    "generator":  "built-in imagegen"
+}

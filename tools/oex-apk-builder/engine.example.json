@@ -1,0 +1,22 @@
+{
+  "package": "org.example.myengine.oex",
+  "name": "My Engine",
+  "author": "Your name",
+  "version": "1.0.0",
+  "version_code": 1,
+  "min_sdk": 21,
+  "target_sdk": 36,
+  "build_tools": "36.0.0",
+  "binaries": {
+    "arm64-v8a": "engines/arm64-v8a/myengine",
+    "armeabi-v7a": "engines/armeabi-v7a/myengine",
+    "x86_64": "engines/x86_64/myengine",
+    "x86": "engines/x86/myengine"
+  },
+  "licenses": [
+    "ENGINE-LICENSE.txt",
+    "NDK-NOTICE.txt"
+  ],
+  "output": "dist",
+  "signing_directory": "private/org.example.myengine.oex"
+}

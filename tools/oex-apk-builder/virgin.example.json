@@ -1,0 +1,21 @@
+{
+  "package": "de.dirksommerfeld.virgin.customoex",
+  "name": "Virgin 0.8.0",
+  "author": "Dirk D. Sommerfeld",
+  "version": "0.8.0",
+  "version_code": 80001,
+  "min_sdk": 21,
+  "target_sdk": 36,
+  "build_tools": "36.0.0",
+  "binaries": {
+    "arm64-v8a": "../../build/android-oex-arm64-v8a/virgin",
+    "armeabi-v7a": "../../build/android-oex-armeabi-v7a/virgin",
+    "x86_64": "../../build/android-oex-x86_64/virgin",
+    "x86": "../../build/android-oex-x86/virgin"
+  },
+  "licenses": [
+    "VIRGIN-ENGINE-LICENSE.txt"
+  ],
+  "output": "dist",
+  "signing_directory": "private/de.dirksommerfeld.virgin.customoex"
+}
