@@ -80,6 +80,7 @@ VIRGIN_THREAD_LOCAL size_t g_repetitionStart = 0;
 VIRGIN_THREAD_LOCAL size_t g_rootHistoryIndex = 0;
 
 VIRGIN_THREAD_LOCAL int16_t g_history[COLOR_NB][SQUARE_NB][SQUARE_NB];
+VIRGIN_THREAD_LOCAL int16_t g_captureHistory[COLOR_NB][PIECE_TYPE_NB][SQUARE_NB][PIECE_TYPE_NB];
 VIRGIN_THREAD_LOCAL int16_t g_continuation[2048]; // 4 KiB per worker, hashed one-ply context
 VIRGIN_THREAD_LOCAL Move    g_counterMove[COLOR_NB][SQUARE_NB][SQUARE_NB];
 int                  g_lmr[MAX_PLY][64];
@@ -283,6 +284,20 @@ void updateContinuation(int ply, Move move, int bonus) {
     h = int16_t(int(h) + bonus - int(h) * std::abs(bonus) / 16384);
 }
 
+PieceType capturedType(const Position& pos, Move m) {
+    return pos.isEnPassant(m) ? PAWN : type_of(pos.pieceOn(to_sq(m)));
+}
+
+int16_t& captureHistoryRef(const Position& pos, Move m) {
+    return g_captureHistory[pos.sideToMove()][type_of(pos.pieceOn(from_sq(m)))][to_sq(m)][capturedType(pos, m)];
+}
+
+void updateCaptureHistory(const Position& pos, Move m, int bonus) {
+    bonus = std::clamp(bonus, -1024, 1024);
+    int16_t& h = captureHistoryRef(pos, m);
+    h = int16_t(int(h) + bonus - int(h) * std::abs(bonus) / 16384);
+}
+
 int scoreMove(const Position& pos, Move m, Move ttMove, int ply) {
     if (m == ttMove)
         return 1 << 30;
@@ -294,7 +309,8 @@ int scoreMove(const Position& pos, Move m, Move ttMove, int ply) {
         const PieceType victim =
             pos.isEnPassant(m) ? PAWN : type_of(pos.pieceOn(to_sq(m)));
         const PieceType attacker = type_of(pos.pieceOn(from_sq(m)));
-        int             s        = (1 << 24) + pieceValue(victim) * 16 - pieceValue(attacker);
+        int             s        = (1 << 24) + pieceValue(victim) * 16 - pieceValue(attacker)
+                                 + captureHistoryRef(pos, m) / 8;
         if (!seeGE(pos, m, 0))
             s -= (1 << 24) + (1 << 20);  // below killers and all quiet moves
         return s;
@@ -544,6 +560,10 @@ Score search(Position& pos, int depth, Score alpha, Score beta, int ply, bool cu
                                   & ~pos.pieces(us, PAWN) & ~pos.pieces(us, KING)) != 0;
 
     const bool endgameRisk = zugzwangRisk(pos);
+    // Reductions and move-count/futility pruning only misjudge in true pawn
+    // endings (exact tempo play). With pieces on the board they are safe, and
+    // switching them off in every thin endgame cost several plies of depth.
+    const bool pawnEnding = !hasNonPawnMaterial(pos, WHITE) && !hasNonPawnMaterial(pos, BLACK);
     // ------------------------------------------------------------- pruning
     if (!t_testUnpruned && !endgameRisk && !pvNode && !inCheck && !is_mate_score(beta)) {
         // Reverse futility pruning
@@ -594,6 +614,8 @@ Score search(Position& pos, int depth, Score alpha, Score beta, int ply, bool cu
     int         moveCount = 0;
     Move quiets[256];
     int quietCount = 0;
+    Move captures[64];
+    int captureCount = 0;
 
     for (int i = 0; i < list.count; ++i) {
         int bestIdx = i;
@@ -620,7 +642,7 @@ Score search(Position& pos, int depth, Score alpha, Score beta, int ply, bool cu
         const bool dangerousQuiet = !isCaptureMove && !isPromoMove && tacticalQuiet(pos, m);
 
         // Futility pruning and late move pruning (quiet moves only)
-        if (!t_testUnpruned && !endgameRisk && !rootNode && !pvNode && !inCheck && !isCaptureMove && !isPromoMove && !givesCheck && !dangerousQuiet
+        if (!t_testUnpruned && !pawnEnding && !rootNode && !pvNode && !inCheck && !isCaptureMove && !isPromoMove && !givesCheck && !dangerousQuiet
             && best > -SCORE_MATE_BOUND && g_stack[ply].staticEval != SCORE_NONE) {
             if (depth <= 8 && g_stack[ply].staticEval + 100 + 120 * depth <= alpha)
                 continue;
@@ -628,9 +650,17 @@ Score search(Position& pos, int depth, Score alpha, Score beta, int ply, bool cu
                 continue;
         }
 
+        // SEE pruning: skip moves that lose too much material for the depth left.
+        if (!t_testUnpruned && !pawnEnding && !endgameRisk && !rootNode && !pvNode && !inCheck && !givesCheck && !isPromoMove
+            && depth <= 8 && best > -SCORE_MATE_BOUND && moveCount > 1
+            && !seeGE(pos, m, isCaptureMove ? -90 * depth : -25 * depth * depth))
+            continue;
+
         g_stack[ply].currentMove = m;
         if (!isCaptureMove && !isPromoMove)
             quiets[quietCount++] = m;
+        else if (isCaptureMove && !isPromoMove && captureCount < 64)
+            captures[captureCount++] = m;
         g_keyHistory.push_back(next.key());
 
         // Extend sound checks, including checking captures, with a ply budget.
@@ -642,7 +672,7 @@ Score search(Position& pos, int depth, Score alpha, Score beta, int ply, bool cu
             s = -search(next, newDepth, -beta, -alpha, ply + 1, false);
         } else {
             int r = 0;
-            if (!t_testUnpruned && !endgameRisk && depth >= 3 && moveCount > 3 && !isCaptureMove && !isPromoMove && !inCheck
+            if (!t_testUnpruned && !pawnEnding && depth >= 3 && moveCount > 3 && !isCaptureMove && !isPromoMove && !inCheck
                 && !givesCheck) {
                 r = g_lmr[std::min(depth, MAX_PLY - 1)][std::min(moveCount, 63)];
                 if (cutNode)
@@ -691,6 +721,12 @@ Score search(Position& pos, int depth, Score alpha, Score beta, int ply, bool cu
                             updateContinuation(ply, quiets[q], malus);
                         }
                     }
+                    if (isCaptureMove && !isPromoMove) {
+                        const int bonus = std::min(depth * depth, 1024);
+                        updateCaptureHistory(pos, m, bonus);
+                        for (int c = 0; c + 1 < captureCount; ++c)
+                            updateCaptureHistory(pos, captures[c], -bonus);
+                    }
                     break;
                 }
             }
@@ -714,12 +750,13 @@ void initSearch() {
         for (int m = 0; m < 64; ++m)
             g_lmr[d][m] = (m < 2 || d < 2)
                               ? 0
-                              : int(0.77 + std::log(double(d)) * std::log(double(m)) / 2.36);
+                              : int(0.77 + std::log(double(d)) * std::log(double(m)) / 1.75);
 }
 
 void newSearchGame() {
     std::memset(g_history, 0, sizeof(g_history));
     std::memset(g_continuation, 0, sizeof(g_continuation));
+    std::memset(g_captureHistory, 0, sizeof(g_captureHistory));
     std::memset(g_counterMove, 0, sizeof(g_counterMove));
     for (StackEntry& entry : g_stack) {
         entry.killers[0]  = 0;

@@ -131,13 +131,18 @@ kalibriert. Die Suche selbst spielt solide (nach 1.e4 findet sie `d7d5`).
       `KING_COVER[6][4]`) - Vorbild in `ref/arasan-v23.4.0/params.cpp`
 - [ ] Materialabhängige Skalierung des Mittel-/Endspiel-Übergangs
       (`MATERIAL_SCALE` in Arasans `Scores::set`) statt der reinen Figurenzahl
-- [ ] Suchparameter tunen (LMR/LMP/Futility-Margins, Null-Move, Aspiration) -
+- [~] Suchparameter tunen (0.8.6: LMR-Divisor 1,75; Rest offen: LMP/Futility-Margins, Null-Move, Aspiration) -
       das ist der beste Elo-pro-Aufwand-Hebel nach der Bewertung
-- [ ] Lazy SMP (`Threads`-Option): ~50 Zeilen, bei fester Zeit grob +60..100 Elo
+- [x] Lazy SMP (`Threads`-Option) - siehe oben, bereits umgesetzt
 - [ ] Make/Unmake statt Copy-Make und inkrementelles Material/PST
 - [ ] Stile als Deltas, damit die 215 Bots die Tuning-Gewinne erben
 - [ ] Eröffnungsbuch, menschliche Bedenkzeiten
 - [ ] Elo-Eichung der eigenen 700-2800-Skala gegen die Messung
+
+- [x] 0.8.6: Endspiel-Pruning (Futility/LMP/LMR nur noch im reinen Bauernendspiel aus),
+      SEE-Pruning, Capture History, LMR-Divisor 1,75 - Details und Messwerte in
+      `docs/RELEASE_PROZESS_0.8.6.md` und `docs/RELEASE_0.8.6.md`
+- [ ] Singular Extensions; weitere Suchparameter per `tools/ab_run.sh` tunen
 
 ## M6 - Auslieferung (offen)
 

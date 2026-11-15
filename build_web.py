@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parent
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--emsdk', type=Path, default=Path(os.environ.get('EMSDK', str(ROOT/'tools/emsdk'))))
-    parser.add_argument('--output', type=Path, default=ROOT/'dist/virgin-web-0.8.5-20261107')
+    parser.add_argument('--output', type=Path, default=ROOT/'dist/virgin-web-0.8.6-20261115')
     parser.add_argument('--jobs', type=int, default=2)
     args = parser.parse_args()
     sdk = args.emsdk.resolve()
@@ -45,7 +45,7 @@ def main():
     if notice.is_file(): shutil.copyfile(notice, licenses/'EMSCRIPTEN-LICENSE.txt')
     runtime = emscripten/'system/lib/libcxx/LICENSE.TXT'
     if runtime.is_file(): shutil.copyfile(runtime, licenses/'LIBCXX-LICENSE.txt')
-    source_zip = dist/'Virgin-0.8.5-Web-source.zip'
+    source_zip = dist/'Virgin-0.8.6-Web-source.zip'
     with zipfile.ZipFile(source_zip, 'w', zipfile.ZIP_DEFLATED) as archive:
         for item in (ROOT/'src').glob('*'):
             if item.is_file() and (item.suffix in ('.cpp','.h','.inc') or item.name == 'LICENSE'):
@@ -55,7 +55,7 @@ def main():
         archive.write(ROOT/'build_web.py', 'build_web.py')
         archive.write(ROOT/'tools/test_web.cjs', 'tools/test_web.cjs')
     version_file = emscripten/'emscripten-version.txt'
-    manifest = {'engine':'Virgin 0.8.5', 'author':'Dirk D. Sommerfeld',
+    manifest = {'engine':'Virgin 0.8.6', 'author':'Dirk D. Sommerfeld',
       'emscripten':version_file.read_text().strip().strip(chr(34)) if version_file.exists() else 'see SDK',
       'uci_threads_max':4, 'hash_default_mib':32, 'hash_max_mib':256,
       'wasm_memory_initial_mib':128, 'wasm_memory_max_mib':512,

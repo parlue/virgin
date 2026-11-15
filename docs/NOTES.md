@@ -471,3 +471,8 @@ ESP32-S3: drei gebaute ESP-IDF-Profile (ohne PSRAM, Quad-PSRAM, Octal-PSRAM), kl
 2026-11-02: Core2 battery header: horizontal battery at far right with percent and charging bolt, red at <=20%; cached M5.Power battery/charging readings every 5s, unknown level shown as --%. Header region refreshed separately even during sidebar-only draws. Existing Adaptive, queen, Move, restart and BLE game/protocol logic unchanged. Firmware built successfully. Flash and display QA pending: Core2 USB port absent. Package dist/virgin-core2-0.8.0-20261102-battery. Certabo/Spectrum physical board test remains pending.
 
 2026-11-02: Core2 battery header: horizontal battery at far right with percent and charging bolt, red at <=20%; cached M5.Power battery/charging readings every 5s, unknown level shown as --%. Header region refreshed separately even during sidebar-only draws. Existing Adaptive, queen, Move, restart and BLE game/protocol logic unchanged. Firmware built and flashed COM17, actual PMIC level/charging status and LCD screenshot checked via read-only UART; no game/board commands or reset during UI QA. Package dist/virgin-core2-0.8.0-20261102-battery. Certabo/Spectrum physical board test remains pending.
+
+
+## 0.8.6 (15.11.2026)
+
+Suche gestärkt: Endspiel-Pruning, SEE-Pruning, Capture History, LMR-Divisor 1,75. Selbst-A/B-Messung mit `tools/ab_run.sh` (5 parallele Prozesse, `VIRGIN_MATCH_SEED`). Ablauf, Werkzeuge, Messwerte und Fallstricke der Auslieferung: `docs/RELEASE_PROZESS_0.8.6.md`. Keine Matches gegen Fremdengines gestartet; Selbstvergleich gegen das eigene Vorgänger-Binary war vom Nutzer erlaubt (nicht über Stunden). Hardware-Läufe (Android, ARM, ESP32) nicht gemacht.

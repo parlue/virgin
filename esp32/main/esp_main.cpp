@@ -68,7 +68,7 @@ extern "C" void app_main() {
         setSearchPoll(yieldSearch);
         char name[] = "virgin"; char* argv[] = {name, nullptr};
         uciInit(1, argv);
-        std::cout <<
+        std::cout << 
 #ifdef VIRGIN_CORE2
                      "info string Virgin M5Stack Core2 ready: hash "
 #else

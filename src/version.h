@@ -1,2 +1,2 @@
 #pragma once
-#define VIRGIN_VERSION "0.8.5"
+#define VIRGIN_VERSION "0.8.6"

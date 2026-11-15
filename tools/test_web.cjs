@@ -4,7 +4,7 @@ const os = require('node:os');
 const path = require('node:path');
 const {spawn} = require('node:child_process');
 const ROOT = path.resolve(__dirname, '..');
-const DIST = process.argv[2] || path.join(ROOT,'dist/virgin-web-0.8.5-20261107');
+const DIST = process.argv[2] || path.join(ROOT,'dist/virgin-web-0.8.6-20261115');
 const python = process.env.VIRGIN_TEST_PYTHON || (process.platform === 'win32' ? 'python' : 'python3');
 const chrome = process.env.VIRGIN_TEST_CHROME || path.join(process.env.PROGRAMFILES || 'C:/Program Files', 'Google/Chrome/Application/chrome.exe');
 const sleep = ms => new Promise(resolve=>setTimeout(resolve,ms));
@@ -41,7 +41,7 @@ const browserTest = async () => {
  try {
   await wait(()=>ready,'runtime ready',60000);
   await until('uci',/^uciok$/);
-  assert(lines.includes('id name Virgin 0.8.5')&&lines.includes('id author Dirk D. Sommerfeld'),'Correct engine identity');
+  assert(lines.includes('id name Virgin 0.8.6')&&lines.includes('id author Dirk D. Sommerfeld'),'Correct engine identity');
   assert(lines.some(x=>x.startsWith('option name Adaptive type check')),'Adaptive UCI option');
   assert(lines.some(x=>x.includes('var Fortress var Stone var Normal var Fire var Thunder')),'All five English styles');
   assert(lines.some(x=>/^option name Threads .* max 4$/.test(x)),'Browser thread limit advertised');
@@ -115,7 +115,7 @@ const browserTest = async () => {
   const result=await page.send('Runtime.evaluate',{expression:'('+browserTest.toString()+')()',awaitPromise:true,returnByValue:true,timeout:180000});
   if(result.exceptionDetails)throw new Error(JSON.stringify(result.exceptionDetails));
   const report={browser:info.Browser,...result.result.value};
-  fs.writeFileSync(path.join(ROOT,'reports/web-browser-test-0.8.5-20261107.json'),JSON.stringify(report,null,2));
+  fs.writeFileSync(path.join(ROOT,'reports/web-browser-test-0.8.6-20261115.json'),JSON.stringify(report,null,2));
   console.log(JSON.stringify(report,null,2));
   if(report.status!=='PASS')process.exitCode=1;
  } catch(error){console.error(error.stack||error);process.exitCode=1;}

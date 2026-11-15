@@ -1,6 +1,8 @@
 // Virgin - UCI chess engine
 // Match runner: plays our engine against an external UCI engine and estimates
 // our Elo by increasing the opponent's UCI_Elo level by level.
+#include <random>
+#include <cstdlib>
 #include "match.h"
 
 #include "botdata.h"
@@ -267,7 +269,7 @@ int materialBalance(const Position& pos) {
 }
 
 GameResult playGame(ChildProcess& opponent, const MatchConfig& cfg, Color ourColor,
-                    const std::vector<const char*>& opening, int oppMs) {
+                    const std::vector<const char*>& opening, int oppMs, uint32_t varySeed = 0) {
     GameResult  result;
     Position    pos;
     std::string error;
@@ -283,6 +285,34 @@ GameResult playGame(ChildProcess& opponent, const MatchConfig& cfg, Color ourCol
         pos.applyMove(m);
         moves.push_back(text);
         keys.push_back(pos.key());
+    }
+
+    // Optional variety (env VIRGIN_MATCH_SEED): a few seeded random plies after the
+    // book line, kept only if material stays level. Both colours of a pair get the
+    // same seed, so parallel A/B runs with different seeds do not repeat games.
+    if (varySeed != 0) {
+        std::mt19937 rng(varySeed);
+        for (int attempt = 0; attempt < 50; ++attempt) {
+            Position trial = pos;
+            std::vector<std::string> addMoves;
+            std::vector<Key> addKeys;
+            bool ok = true;
+            for (int k = 0; k < 4 && ok; ++k) {
+                MoveList lm;
+                if (generateLegal(trial, lm) == 0) { ok = false; break; }
+                const Move m = lm.moves[size_t(rng() % uint32_t(lm.count))];
+                addMoves.push_back(move_to_uci(m));
+                trial.applyMove(m);
+                addKeys.push_back(trial.key());
+            }
+            MoveList after;
+            if (!ok || generateLegal(trial, after) == 0 || std::abs(materialBalance(trial)) > 60)
+                continue;
+            pos = trial;
+            moves.insert(moves.end(), addMoves.begin(), addMoves.end());
+            keys.insert(keys.end(), addKeys.begin(), addKeys.end());
+            break;
+        }
     }
 
     for (int ply = 0; ply < cfg.maxMoves; ++ply) {
@@ -549,7 +579,12 @@ int runMatch(const MatchConfig& config) {
             waitReady(opponent);
             newSearchGame();
 
-            const GameResult r = playGame(opponent, config, ourColor, opening, oppMs);
+            static const uint32_t varyBase = [] {
+                const char* e = std::getenv("VIRGIN_MATCH_SEED");
+                return e ? uint32_t(std::atoi(e)) : 0u;
+            }();
+            const GameResult r = playGame(opponent, config, ourColor, opening, oppMs,
+                                          varyBase ? varyBase * 1000003u + uint32_t(g / 2) + 1u : 0u);
             if (r.score > 0) ++outcome.wins;
             else if (r.score < 0) ++outcome.losses;
             else ++outcome.draws;

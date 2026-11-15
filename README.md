@@ -1,137 +1,238 @@
-<p align="center">
-  <img src="assets/virgin-logo.png" alt="Virgin" width="360">
-</p>
+# Virgin - UCI Schachengine mit Stil-Bots
 
-# Virgin
+Entwicklungskandidat: **Virgin 0.8.6 Beta** – [Stärkere Suche](docs/RELEASE_0.8.6.md). Dateien: `dist/virgin-0.8.6-20261115/`.
 
-## Virgin 0.8.5 Beta
+C++20-UCI-Engine, gebaut für **Bots**: aus Stärkestufe x Spielstil entstehen
+fertige Gegner. Alle Bewertungsgewichte sind von außen steuerbar.
 
-Version **0.8.5**, 7 November 2026, adds an optional live game-performance display.
-Enable `LivePerformance` (automatic in Adaptive) and send `performance` to read
-the values for both colours. This describes the current game, not a calibrated
-FIDE rating. See [the integration guide](docs/APP_PERFORMANCE_0.8.5.md).
+* Ziel: 2500-2800 Elo (handgebaute Evaluation, kein NNUE - damit alle Gewichte
+  einzeln beeinflussbar bleiben).
+* Stilachse "Mut": **Fortress - Stone - Normal - Fire - Thunder**
+* Stärke: 700 bis 2800 in 50er-Schritten (oder jede ganze Zahl).
+* Katalog: **43 Stufen x 5 Stile = 215 Bots** (`data/bots.json`).
+* Windows und Android aus derselben Codebasis, keine externen Bibliotheken,
+  Binary ~298 KB (Windows) bzw. ~780 KB (Android, statisch).
 
-Ready-to-use files: **[dist/virgin-0.8.5-20261107](dist/virgin-0.8.5-20261107)**.
-Includes Windows x64 EXE/DLL, Android AAR/JNI/UCI for four ABIs, WebAssembly,
-three ESP32-S3 profiles, and static Linux x64, ARMv6 and ARMv7 UCI engines.
-Files are provided directly in platform folders, without a ZIP or APK.
-Validation and hardware-test limits are documented in the
-[release notes](docs/RELEASE_0.8.5.md) and version manifest.
+## Schnellstart
 
-The tuned `adaptive_params.h` remains private under the existing repository policy;
-see [public source notes](dist/virgin-0.8.5-20261107/PUBLIC_SOURCE_NOTES.md).
+```powershell
+cd C:\Users\DirkSommerfeld\Documents\Projects\virgin
 
+.\run_all.cmd                        # alles auf einmal: Build + Daten + Selbsttest
+```
 
-**A UCI chess engine built for bots.**
+Einzeln – alles über die Engine selbst, kein Hilfsskript nötig:
 
-Virgin is an aggressive, independent tactician; its strategic reliability still varies. That is the character it ships with, and it is the reason the engine exists: every part of its evaluation can be steered from the outside, so you can shape that character into many different opponents.
+```powershell
+.\build_win.ps1                      # Windows-Binary
+.\build_android.ps1                  # Android-Binary (arm64-v8a, PIE)
+.\build_android.ps1 -Static          # Android-Binary, voll statisch
 
-* **Make your own bots.** A bot is a playing strength combined with a playing style. Virgin ships a catalogue of **215 ready-made bots** (43 strength levels x 5 styles), and you can define as many more as you like with a plain text file.
-* **Every weight is adjustable.** About 90 evaluation weights are exposed as UCI options and in one weights file. No NNUE, no opaque network: you can read, change and reload each value.
-* **One small file.** C++20, no external libraries. The Windows binary is under 500 KB, the static Android binary under 1 MB.
-* **Windows, Android, Linux, WebAssembly and ESP32-S3** from a shared C++ core. Android includes arm64-v8a, armeabi-v7a, x86_64 and x86.
-* **Plain UCI.** Works with any UCI host: BearChess, Arena, Cute Chess, your own app.
+.\build\win\virgin.exe --gen-data    # data\ erzeugen (Gewichte, Stile, Elo, Bots)
+.\build\win\virgin.exe --selftest    # eingebauter Testlauf
+.\build\win\virgin.exe --selfplay v1200-fortress v1200-thunder 60 5
+.\run_match.cmd                       # Elo-Treppe gegen Stockfish 18 (1 s/Zug)
+.\tools\nightly.ps1                  # Nachtlauf: bauen + prüfen + Report
+```
 
-## The five styles
+## UCI-Kommandos
 
-The style axis is called *Boldness*, from cautious to reckless:
+Standard: `uci`, `isready`, `ucinewgame`, `setoption`, `position`, `go`
+(`depth`, `nodes`, `movetime`, `wtime/btime/winc/binc/movestogo`, `infinite`,
+`ponder`), `stop`, `ponderhit`, `quit`, `debug`.
 
-| Level | Id | Meaning |
+Zusätzlich: `d` (Brett anzeigen), `eval` (Bewertung mit Aufschlüsselung),
+`perft <n>`, `bench <n>`, `compiler`, `sanity` (Konsistenzprüfung),
+`weights` (alle Gewichte), `listbots` (Bot-Katalog).
+
+## Testen ohne fremde Software
+
+Alles läuft über die Engine selbst - sie ist ein UCI-Prozess, deine App ist der
+Host (siehe `docs/APP_INTEGRATION.md`):
+
+```powershell
+.\build\win\virgin.exe --help             # alle Modi
+.\build\win\virgin.exe --perft 5          # muss 4865609 liefern
+.\build\win\virgin.exe --selftest         # 43 Prüfungen, Exit-Code
+.\build\win\virgin.exe --list-bots        # 215 Bots
+.\build\win\virgin.exe --gen-data         # data\ neu erzeugen
+
+# Partie zwischen zwei Bot-Profilen, in der Engine selbst
+.\build\win\virgin.exe --selfplay v1200-fortress v1200-thunder 60 5
+```
+
+`--selfplay` zeigt Zug, Bewertung und Tiefe und schreibt ein Log nach
+`reports/`. Stil und Stärke werden dabei wie im UCI-Betrieb angewendet.
+
+## Wettkampf gegen eine fremde Engine (Elo messen / Spot suchen)
+
+`--match` startet eine fremde UCI-Engine als Kindprozess, spielt Partien mit
+fester Bedenkzeit und sucht die Stufe, auf der das Ergebnis bei 50 % liegt.
+Stockfish 18 kann sich per `UCI_LimitStrength`/`UCI_Elo` begrenzen lassen:
+
+```powershell
+# 4 Partien je Stufe (2x Weiss, 2x Schwarz), 1 s/Zug, Start 2300, Schritt 50
+.\\run_match.cmd
+.\\run_match.cmd 2300 50 4 1000 2800 v2800-normal
+
+# Spot-Suche ab Stockfishs Elo-Untergrenze: erst Elo, dann Gegnerzeit halbieren
+.\\build\\win\\virgin.exe --match C:\\Pfad\\stockfish18.exe 2300 50 4 1000 2800 v2800-normal reports 8
+
+# klassische Treppe nur nach oben (statt Spot-Suche)
+.\\build\\win\\virgin.exe --match ... reports up
+```
+
+Die Engine
+
+* eröffnet jede Partie mit einer von 8 kurzen Eröffnungen (Farbwechsel inklusive),
+* prüft jeden Fremdzug gegen die eigene Zugliste (Rochade, En passant, Umwandlung),
+* erkennt Matt, Patt, 50-Züge-Regel, dreifache Wiederholung und entscheidet
+  nach 110 Zügen per Materialvorteil,
+* **bricht eine Stufe sofort ab**, sobald 50 % nicht mehr erreichbar sind
+  (zwei Niederlagen statt vier), und hört ganz auf, wenn selbst 30 ms Gegnerzeit
+  nicht reichen,
+* schreibt jede Partie als PGN nach `reports/match-<bot>-<von>-<bis>-<ms>ms.pgn`,
+* meldet am Ende den Spot, z. B.
+  `SPOT: 50 % against SF Elo 1320 with 250 .. 500 ms/move (we play 1000 ms)`.
+
+## A/B gegen die eigene Vorgängerversion
+
+Für Bewertungsänderungen ist der Spot-Lauf gegen Stockfish zu grob (wenige
+Partien, viel Rauschen). `--match` startet jedes UCI-Programm als Gegner - also
+auch die eigene vorherige Version, mit identischer Bedenkzeit:
+
+```powershell
+# 1) Baseline sichern (vor dem Umbau!), 2) neu bauen, 3) 100 Partien bei 100 ms
+Copy-Item build\win\virgin.exe build\win\virgin_base.exe
+.\build_win.ps1
+.\build\win\virgin.exe --match build\win\virgin_base.exe 2800 50 100 100 2800 v2800-normal reports 1 100
+#                              Gegner                            Stufen  Partien  ms  ...
+```
+
+Beide Seiten spielen denselben Code mit derselben Zeit; der Unterschied ist
+praktisch nur die Bewertung. Aus dem Gesamtergebnis folgt direkt ein
+Elo-Delta (50 % = gleich stark). `Elo 2800` bedeutet hier "kein Handicap".
+
+Der Match schreibt am Ende selbst das Verdikt:
+
+```text
+  game 12/100  [03:41]  we play black, opening 6 -> LOSS (188 plies, adjudicated: material down)
+  ...
+ overall: +28 =5 -25   58 games   score 52.6 %
+ verdict: +18 Elo vs 50 % (95 % confidence +/- 52)   in 17.0 min   (3.4 games/min)
+```
+
+Zur Einordnung: die 95 %-Schranke ist ungefähr `680 / sqrt(Partien)` Elo
+(100 Partien ≈ ±70 Elo), und der Durchsatz liegt bei 100 ms/Zug bei rund
+**3,4 Partien pro Minute** (also ~30 Minuten für 100 Partien). Wichtig: während
+einer Messung die Maschine nicht anderweitig belasten, sonst konkurrieren die
+Engines mit sich selbst.
+
+## Herkunft der Bewertung
+
+Die Bewertung ist handgebaut (kein NNUE), damit alle 91 Gewichte einzeln von
+außen steuerbar bleiben. Die **Grundformen der Figurenfeld-Tabellen** kommen
+aus den veröffentlichten **PeSTO-Tabellen** (Ronald Friederich, Engine
+RofChade/PeSTO; erzeugt von `tools/extract_pesto.ps1` nach `src/pst_pesto.h`).
+Die eigenen `Pst.*`-Gewichte liegen als Deltas darüber.
+
+Referenzengines wurden nur auf **Lizenz und Aufbau** geprüft, Quellen liegen
+unkompiliert unter `ref/`:
+
+| Engine | Lizenz | Verwendung |
 |---|---|---|
-| 1 | `furchtsam` | timid: safety first, avoids sharp lines, accepts draws |
-| 2 | `vorsichtig` | cautious: solid and positional |
-| 3 | `ausgeglichen` | balanced: the reference style, all weights at default |
-| 4 | `angriffslustig` | aggressive: goes for the king, avoids queen trades |
-| 5 | `stier` | bull: sacrifices, pawn storms, king hunts |
+| Arasan (Jon Dart) | MIT/Expat | prüfbar, auch Codeübernahme erlaubt |
+| PeSTO-Tabellen | veröffentlichte Daten | übernommen, mit Quellenangabe |
+| Ethereal, Stockfish | GPL-3.0 | nur Ideen, kein Code |
 
-Style changes the evaluation weights (king attack, pawn storm, initiative, sacrifice tolerance, contempt, and more) and adds controlled randomness in the root move choice, so the bots feel different from each other, not just weaker.
 
-## Create a bot
+## Tuning (Texel) und Messung
 
-### 1. Pick one from the catalogue
+Die Engine kann ihre eigenen Bewertungsgewichte kalibrieren — ebenfalls als
+Engine-Modus, ohne Hilfssprachen:
 
-```text
-setoption name Bot value v1200-stier
+```powershell
+# Selfplay-Daten sammeln, K-Faktor scannen, Gewichte per Koordinatenabstieg fitten
+.\build\win\virgin.exe --tune 200 6 5 data\weights_tuned.txt 20
+#                 Partien  Tiefe  Passes  Ausgabe            max. Abweichung in %
+
+# Ergebnis messen (Spot-Suche gegen Stockfish, 1 s/Zug, getunte Gewichte laden)
+.\build\win\virgin.exe --match C:\Pfad\stockfish18.exe 1320 50 6 1000 2800 v2800-normal reports 8 0 data\weights_tuned.txt
+
+# oder alles unbeaufsichtigt über den Nachtlauf:
+.\tools\nightly.ps1 -TuneGames 300 -MatchEngine C:\Pfad\stockfish18.exe
 ```
 
-Bot ids have the form `v<elo>-<style>`, for example `v700-furchtsam`, `v1500-angriffslustig` or `v2800-ausgeglichen`. The full catalogue is in `data/bots.txt`. `virgin --list-bots` prints it, and `virgin --gen-data` also writes it as `data/bots.json` for apps.
+Der Tuner teilt die Stellungen deterministisch in **80 % Training / 20 %
+Validierung**. Getunt wird nur auf den Trainingsdaten, und die Ausgabedatei wird
+**nur geschrieben, wenn auch der Validierungsfehler besser wird** (sonst Exit-Code
+4 und die kompilierten Defaults bleiben). Ohne diese Sperre hat der erste
+Tuning-Versuch die Bewertung überfitet und die Engine messbar schwächer gemacht.
 
-### 2. Combine strength and style yourself
 
 ```text
+setoption name Bot value v1200-thunder      # Elo + Stil + Handicap in einem Schritt
+setoption name UCI_Elo value 1250         # freie Zahl erlaubt (700..3000)
 setoption name UCI_LimitStrength value true
-setoption name UCI_Elo value 1250
-setoption name Style value Angriffslustig
-setoption name Boldness value 45
-```
-
-`Boldness` runs from 10 (timid) to 50 (bull) and interpolates between the styles. `UCI_Elo` accepts any whole number, not only the 50-point steps of the catalogue.
-
-### 3. Tune single weights
-
-```text
+setoption name Style value Fire
+setoption name Boldness value 45          # 10 = fortress ... 50 = thunder
 setoption name Aggression.KingAttack value 260
-setoption name Misc.MoveNoise value 40
-```
-
-### 4. Save your bot as a weights file
-
-A bot is just a text file with `Name = value` lines:
-
-```text
-# my-bot.txt
-Aggression.KingAttack = 260
-Aggression.PawnStorm = 180
-Aggression.AvoidQueenTrade = 220
-Misc.Contempt = 25
-```
-
-Load it with:
-
-```text
-setoption name WeightsFile value C:\bots\my-bot.txt
+setoption name Hash value 64              # Transpositionstabelle in MB
+setoption name Threads value 4            # Lazy SMP (1..64, Standard 1)
+setoption name WeightsFile value C:\mein-bot.txt
 setoption name ReloadWeights
+listbots
 ```
 
- `data/weights_default.txt` lists every weight with its default and range.
+## Dokumentation
 
-## UCI options
-
-| Option | Meaning |
+| Datei | Inhalt |
 |---|---|
-| `Bot` | select a catalogue bot, e.g. `v1200-stier` (sets strength and style at once) |
-| `UCI_LimitStrength`, `UCI_Elo` | limit playing strength (700 to 3000) |
-| `Style`, `Boldness` | playing style and its fine control |
-| `WeightsFile`, `ReloadWeights` | load your own weights file |
-| `Misc.Contempt`, `Misc.MoveNoise` | draw attitude and root move randomness |
-| `Hash`, `Threads`, `Ponder` | the usual: hash size in MB, Lazy SMP threads, pondering |
-| `<Group>.<Term>` | every evaluation weight, e.g. `Aggression.KingAttack` |
+| `docs/NOTES.md` | Entscheidungsprotokoll und aktueller Stand |
+| `docs/ROADMAP.md` | Meilensteine M1-M6 mit Status |
+| `docs/WEIGHTS.md` | alle 90 Gewichte und wie man sie von außen setzt |
+| `docs/BOTS.md` | Bot-Konzept, Stile, Elo-Profil, App-Integration |
+| `docs/WEIGHTS.md` | alle 91 Gewichte und wie man sie von außen setzt |
+| `ref/README.md` | Herkunft und Lizenz der Referenzquellen (PeSTO, Arasan) |
+| `docs/APP_INTEGRATION.md` | **Einbindung in die eigene App** (Kotlin/C#) |
+| `docs/BUILD_ANDROID.md` | Android-Build und Einbau in die App |
 
-Extra commands besides the standard ones: `d`, `eval` (evaluation breakdown), `perft <n>`, `bench <n>`, `sanity`, `weights`, `listbots`.
+## Projektstruktur
 
-## Build
-
-You need CMake 3.20 or newer and a C++20 compiler.
-
-```powershell
-.\build_win.ps1                  # Windows x64 (MSVC)
-.\build_android.ps1              # Android arm64-v8a, needs the NDK
-.\build_android.ps1 -Static      # fully static Android binary
+```
+src/            Engine (types, bitboard, position, movegen, eval, weights, botdata, search, selftest, uci)
+data/           Gewichte, Stile, Elo-Profil, Bot-Katalog (generiert, optional zur Laufzeit)
+dist/           fertige Android-Binaries fuer die App (virgin-arm64-v8a, -armeabi-v7a, -x86_64)
+tools/          nightly.ps1 (Nachtlauf-Wrapper; Daten und Tests macht die Engine)
+build_win.ps1   Windows-Build (MSVC 2022)
+build_android.ps1  Android-Build (NDK 27, PIE oder -Static, -Dist kopiert nach dist\)
+run_all.cmd     Ein-Befehl-Pipeline: Build, Daten, Selbsttest
+run_match.cmd   Elo-Treppe gegen Stockfish 18 (1 s/Zug, 4 Partien je Stufe)
 ```
 
-Then run the built-in checks:
+## Status
 
-```powershell
-.\build\win\virgin.exe --selftest       # built-in test run
-.\build\win\virgin.exe --perft 5        # must print 4865609
-.\build\win\virgin.exe --gen-data       # regenerate data\ (weights, styles, bot catalogue)
-```
+Meilensteine 1-5 sind fertig und verifiziert:
 
+* **Suche**: iterative Vertiefung mit Aspiration Windows, PVS, Transpositionstabelle,
+  Quiescence + SEE, Null-Move, LMR/LMP/Futility/Razoring, Killer/Countermove/History,
+  `Contempt` für Remis-Bewertung. Nach 1.e4 findet sie `d7d5`.
+* **Bewertung**: 13 Termgruppen (Material, PST, Mobilität, Königssicherheit,
+  Bauernstruktur, Türme, Figuren, Bedrohungen, Raum, Initiative, Endspiel,
+  Aggression, Komplexität) + Remis-Skalierung + Lazy Evaluation. Über `eval`
+  ist die Aufschlüsselung abrufbar.
+* **Bots**: Stil, Elo-Handicap (Tiefe, Nodes, Fehlerquote) und Wissens-Skalierung
+  wirken; v700 spielt Tiefe 2, v2800 Tiefe 10-12.
+* `--selftest` mit **43 Prüfungen** PASSED (Perft, Zobrist, Symmetrie,
+  Gewichte, Zug-Kodierung, Zuglisten-Replay (Rochade/En passant), Bot-Katalog,
+  SEE, Taktik, 8 Eval-Termtests).
 
-## Use it in your own app
+Offen ist vor allem das **Texel-Tuning** der Termgewichte (die Startwerte sind
+geschätzt, daher noch Züge wie `1.g4` im Selfplay), ein Eröffnungsbuch und die
+Elo-Kalibrierung - siehe `docs/ROADMAP.md`.
 
-Virgin is a plain process that speaks UCI over stdin and stdout. Your app is the host: start the process, send commands, read the replies.
+## Lizenz
 
-## License
-
-MIT, see LICENSE. Credits for the data and ideas Virgin builds on are in THIRD_PARTY.txt.
+Eigener Code, MIT. Es wurde kein Quellcode aus GPL-Engines übernommen; nur
+veröffentlichte Algorithmen und Ideen (Magic Bitboards, PVS, Texel-Tuning,
+MadChess-Muster für Limit-Strength).
