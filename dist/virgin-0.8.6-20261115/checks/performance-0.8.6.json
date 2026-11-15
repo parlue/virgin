@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "checks": [
+    "Option and disabled default",
+    "Position queued, full-strength player measurement on go, query never starts search",
+    "Repeated position/search does not count a move twice",
+    "Both colours tracked independently; selected engine move committed only after actual position",
+    "Takeback/branch resets invalid history",
+    "Adaptive forces evaluation on and restores optional normal setting",
+    "New game restores >2800 and clears evidence",
+    "Read-only query remains responsive during search",
+    "Cancellation survives serial performance/main searches and rapid stop",
+    "Tiny time budgets defer measurement honestly, then process pending work once",
+    "Optional preparation analyses candidates without inventing a played move",
+    "Speculative ponder move never counted; miss preserves confirmed history",
+    "Performance measurement restores all handicap/knowledge settings",
+    "Disabled mode performs no measurements"
+  ]
+}

@@ -31,5 +31,6 @@ experiments/
 
 # Versioned release files are published, including binaries and check logs
 !dist/virgin-0.8.5-20261107/**
+!dist/virgin-0.8.6-20261115/**
 **/adaptive_params.h
 **/private/

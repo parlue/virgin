@@ -1,0 +1,92 @@
+# Virgin style profiles - five levels of boldness
+# 1 = Fortress ... 5 = Thunder
+
+[style.fortress]
+# level = 1
+# name  = Fortress
+# desc  = Sicherheit zuerst, meidet Schaerfe, nimmt Remis an
+Misc.Contempt = -25
+Group.Material = 120
+Group.KingSafety = 200
+Group.Pawns = 160
+Group.Mobility = 90
+Group.Threats = 110
+Group.Drawish = 130
+Group.Aggression = 40
+Group.Complexity = 30
+Aggression.KingAttack = 40
+Aggression.PawnStorm = 0
+Aggression.Initiative = 30
+Aggression.SacrificeTolerance = 0
+Aggression.AvoidQueenTrade = 0
+Rooks.OpenFileVsKing = 15
+KingSafety.ShieldMissing = -35
+Pst.KingMgShelter = 30
+
+[style.stone]
+# level = 2
+# name  = Stone
+# desc  = Solide und positionell, geringes Risiko
+Misc.Contempt = -5
+Group.Material = 110
+Group.KingSafety = 150
+Group.Pawns = 130
+Group.Mobility = 95
+Group.Threats = 105
+Group.Drawish = 115
+Group.Aggression = 70
+Group.Complexity = 60
+Aggression.KingAttack = 70
+Aggression.PawnStorm = 50
+Aggression.Initiative = 60
+Aggression.SacrificeTolerance = 40
+Aggression.AvoidQueenTrade = 50
+Rooks.OpenFileVsKing = 24
+
+[style.normal]
+# level = 3
+# name  = Normal
+# desc  = Referenzstil, alle Gewichte auf Standard
+
+[style.fire]
+# level = 4
+# name  = Fire
+# desc  = Sucht den Koenigsangriff, meidet Damentausch
+Misc.Contempt = 15
+Group.Material = 100
+Group.KingSafety = 110
+Group.Pawns = 100
+Group.Mobility = 105
+Group.Threats = 110
+Group.Drawish = 90
+Group.Aggression = 125
+Group.Complexity = 100
+Aggression.KingAttack = 125
+Aggression.PawnStorm = 120
+Aggression.Initiative = 150
+Aggression.SacrificeTolerance = 120
+Aggression.AvoidQueenTrade = 110
+Rooks.OpenFileVsKing = 42
+
+[style.thunder]
+# level = 5
+# name  = Thunder
+# desc  = Tollkuehn: Opfer, Bauernsturm, Koenig jagt Koenig
+Misc.Contempt = 45
+Group.Material = 90
+Group.KingSafety = 70
+Group.Pawns = 70
+Group.Mobility = 110
+Group.Threats = 120
+Group.Drawish = 80
+Group.Aggression = 220
+Group.Complexity = 220
+Aggression.KingAttack = 220
+Aggression.PawnStorm = 250
+Aggression.Initiative = 220
+Aggression.SacrificeTolerance = 300
+Aggression.AvoidQueenTrade = 200
+Rooks.OpenFileVsKing = 54
+KingSafety.ShieldMissing = -10
+Pst.KingMgShelter = 10
+
