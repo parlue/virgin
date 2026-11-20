@@ -1,6 +1,7 @@
 #include "adaptive.h"
 #include "adaptive_params.h"
 #include "movegen.h"
+#include "opening_book.h"
 #include <algorithm>
 #include <cmath>
 #include <numeric>
@@ -59,11 +60,49 @@ AdaptiveChoice chooseAdaptive(const Position& pos, const std::vector<SearchCandi
         state.accuracy.erase(state.accuracy.begin());
     const double accuracy = state.accuracy.empty() ? -1.0
         : double(std::count(state.accuracy.begin(), state.accuracy.end(), true)) / state.accuracy.size();
-    const auto done = [&](size_t index, const char* mode) {
+    (void)tieRoll; // Kept for the development probe protocol.
+    const auto done = [&](size_t index, const char* mode, bool protect = false) {
+        if (!protect && !pos.inCheck() && !is_mate_score(cands[best].score) && std::isfinite(tiePick)) {
+            std::vector<size_t> equal{index};
+            const int anchor = engineScore(cands[index].score);
+            const int maxLoss = std::max(gleichwertig_cp, bestScore - anchor);
+            const int anchorLoss = materialLoss(pos, cands[index], taktik_plies);
+            const size_t needed = std::min(size_t(taktik_plies), cands[index].pv.size());
+            for (size_t other : order) {
+                if (other == index || is_mate_score(cands[other].score) ||
+                    std::abs(engineScore(cands[other].score) - anchor) > gleichwertig_cp ||
+                    bestScore - engineScore(cands[other].score) > maxLoss ||
+                    cands[other].pv.size() < needed) continue;
+                Position continuation = pos; bool legal = true;
+                for (size_t i = 0; i < needed; ++i) {
+                    const Move move = cands[other].pv[i];
+                    if ((i == 0 && move != cands[other].move) ||
+                        find_legal_move(continuation, move_to_uci(move)) != move) { legal = false; break; }
+                    continuation.applyMove(move);
+                }
+                if (!legal || materialLoss(pos, cands[other], taktik_plies) > anchorLoss ||
+                    materialLoss(pos, cands[other], sicherheit_materialpruefung_halbzuege) >
+                        sicherheit_max_materialverlust_in_cp) continue;
+                equal.push_back(other);
+            }
+            index = equal[std::min(equal.size() - 1,
+                size_t(std::clamp(tiePick, 0.0, 1.0) * equal.size()))];
+        }
         state.expected = player(index); state.hasExpected = true;
         return AdaptiveChoice{index, mode, E, player(index),
             accuracy < 0 ? -1 : int(std::floor(accuracy * 100 + 0.5))};
     };
+    // Tactical protection also applies during the opening and adjustment phases.
+    if (taktik_aktiv) {
+        if (ply <= state.tacticUntil) return done(best, "taktik_folge", true);
+        int length = std::min(taktik_plies, int(cands[best].pv.empty() ? 1 : cands[best].pv.size()));
+        length -= length % 2;
+        const int gain = length ? -materialLoss(pos, cands[best], length) : 0;
+        if (gain >= taktik_min_materialgewinn) {
+            state.tacticUntil = ply + taktik_sperre_halbzuege;
+            return done(best, "taktik", true);
+        }
+    }
     if (ply < eroeffnung_beste_halbzuege) return done(best, "eroeffnung");
     if ((is_mate_score(cands[best].score) && cands[best].score > 0
          && mateMoves(cands[best].score) <= volle_staerke_immer_bei_matt_in)
@@ -73,16 +112,6 @@ AdaptiveChoice chooseAdaptive(const Position& pos, const std::vector<SearchCandi
         state.band = std::abs(E) <= anpassung_gleich_bereich ? state.band + 1 : 0;
         if (ply <= state.adjustUntil) return done(best, "anpassung_folge");
     }
-    if (taktik_aktiv) {
-        if (ply <= state.tacticUntil) return done(best, "taktik_folge");
-        int length = std::min(taktik_plies, int(cands[best].pv.empty() ? 1 : cands[best].pv.size()));
-        length -= length % 2;
-        const int gain = length ? -materialLoss(pos, cands[best], length) : 0;
-        if (gain >= taktik_min_materialgewinn) {
-            state.tacticUntil = ply + taktik_sperre_halbzuege;
-            return done(best, "taktik");
-        }
-    }
     if (E >= halten_ab_bewertung && halten_klebt_bis_partieende) state.hold = true;
     const auto safe = [&](size_t index) {
         if (index == best) return true;
@@ -90,7 +119,7 @@ AdaptiveChoice chooseAdaptive(const Position& pos, const std::vector<SearchCandi
         return loss <= sicherheit_max_materialverlust_in_cp
             && !(sicherheit_nie_dame_oder_turm_opfern && loss >= 450);
     };
-    const auto nearest = [&](int target, int band, int maxLoss) {
+    const auto nearest = [&](int target, int maxLoss) {
         std::vector<size_t> pool;
         for (size_t index : order)
             if (bestScore - engineScore(cands[index].score) <= maxLoss && safe(index))
@@ -99,18 +128,10 @@ AdaptiveChoice chooseAdaptive(const Position& pos, const std::vector<SearchCandi
             return std::abs(player(a) - target) < std::abs(player(b) - target);
         });
         if (pool.empty()) return best;
-        const int first = std::abs(player(pool.front()) - target);
-        std::vector<size_t> top;
-        for (size_t index : pool)
-            if (std::abs(player(index) - target) <= first + band) top.push_back(index);
-        if (top.size() > 1 && tieRoll < ausgleich_zufall_unter_gleichwertigen) {
-            const size_t pick = std::min(top.size() - 1, size_t(std::max(0.0, tiePick) * top.size()));
-            return top[pick];
-        }
         return pool.front();
     };
     if (state.hold)
-        return done(nearest(halten_ziel, halten_gleich_band, halten_max_verlust_gegen_bester_zug), "halten");
+        return done(nearest(halten_ziel, halten_max_verlust_gegen_bester_zug), "halten");
     if (anpassung_aktiv && ply >= anpassung_ab_halbzug && std::abs(E) <= anpassung_gleich_bereich
         && state.band >= anpassung_stabil_zuege && ply - state.lastAdjust >= anpassung_pause_halbzuege
         && state.adjusts < anpassung_max_pro_partie && cands.size() >= size_t(anpassung_min_kandidaten)
@@ -152,7 +173,7 @@ AdaptiveChoice chooseAdaptive(const Position& pos, const std::vector<SearchCandi
         if (pick != best) { ++state.helped; return done(pick, "helfen"); }
         return done(best, "helfen_keiner");
     }
-    return done(nearest(ausgleich_ziel, ausgleich_gleich_band, ausgleich_max_verlust_gegen_bester_zug), "ausgleich");
+    return done(nearest(ausgleich_ziel, ausgleich_max_verlust_gegen_bester_zug), "ausgleich");
 }
 
 bool adaptiveRegressionTests(std::ostream& out) {
@@ -173,6 +194,71 @@ bool adaptiveRegressionTests(std::ostream& out) {
     check(chooseAdaptive(pos, cands, 16, state).mode == "halten" && state.hold, "adaptive hold remains sticky");
     state = {}; state.adjustUntil = 20;
     check(chooseAdaptive(pos, cands, 16, state).mode == "anpassung_folge", "adaptive grace period preserves full-strength moves");
+    bool legalBook = true; size_t count = 0;
+    for (size_t offset = 0; offset < sizeof(OpeningBook::data) / sizeof(Move);) {
+        Position bookPos; bookPos.setFen(OpeningBook::startFen); int plies = 0;
+        while (const Move move = OpeningBook::data[offset++]) {
+            const auto options = OpeningBook::moves(bookPos);
+            if (find_legal_move(bookPos, move_to_uci(move)) != move ||
+                std::find(options.begin(), options.end(), move) == options.end()) {
+                legalBook = false;
+            }
+            bookPos.applyMove(move); ++plies;
+        }
+        legalBook &= plies >= 6 && plies <= OpeningBook::maxPly;
+        ++count;
+    }
+    check(legalBook && count == OpeningBook::lineCount && OpeningBook::dataBytes < 10000,
+          "all compact book lines legal, covered at lookup, and below 10000 bytes");
+    Position bookPos; bookPos.setFen(OpeningBook::startFen);
+    check(OpeningBook::moves(bookPos).size() == 7, "opening book covers seven distinct first moves");
+    bookPos.applyMove(find_legal_move(bookPos, "e2e4"));
+    const auto replies = OpeningBook::moves(bookPos);
+    std::vector<Move> sampled;
+    for (size_t i = 0; i < replies.size(); ++i)
+        sampled.push_back(OpeningBook::choose(bookPos, (i + 0.5) / replies.size()));
+    check(replies.size() == 9 && sampled == replies,
+          "book samples distinct e4 replies equally regardless of line counts");
+    check(OpeningBook::choose(bookPos, 0) == replies.front() &&
+          OpeningBook::choose(bookPos, 1) == replies.back(), "book random endpoints valid");
+    bookPos.applyMove(find_legal_move(bookPos, "a7a6"));
+    check(OpeningBook::moves(bookPos).empty(), "book exits on an unlisted player move");
+
+    auto equal = cands;
+    equal[0].score = equal[1].score = 10;
+    equal[2].score = -11; // outside the 20 cp window
+    state = {};
+    check(chooseAdaptive(pos, equal, 0, state, 1.0, 0.75).index == 1,
+          "opening randomises equal moves without a probability gate or previous-depth veto");
+    state = {};
+    check(chooseAdaptive(pos, equal, 0, state, 1.0, 0).index == 0,
+          "opening random selection can retain the first equal move");
+    state = {}; state.adjustUntil = 20;
+    check(chooseAdaptive(pos, equal, 16, state, 1.0, 1.0).index == 1,
+          "equal moves also randomise during adaptive grace periods");
+    state = {}; state.tacticUntil = 20;
+    check(chooseAdaptive(pos, equal, 0, state, 0, 1).index == 0,
+          "ongoing tactics protect the strongest move even during the opening");
+    auto mate = equal; mate[0].score = SCORE_MATE - 5; mate[1].score = SCORE_MATE - 7;
+    state = {};
+    check(chooseAdaptive(pos, mate, 0, state, 0, 1).index == 0,
+          "mate continuations cannot be replaced by random alternatives");
+    auto corrupt = equal; corrupt[1].pv = {equal[0].move}; state = {};
+    check(chooseAdaptive(pos, corrupt, 0, state, 0, 1).index == 0,
+          "invalid alternative PV cannot enter random pool");
+    Position tactic; tactic.setFen("k7/4q3/8/8/8/8/8/K3R3 w - - 0 1");
+    const Move win = find_legal_move(tactic, "e1e7");
+    const Move quiet = find_legal_move(tactic, "e1e2");
+    Position afterWin = tactic; afterWin.applyMove(win);
+    Position afterQuiet = tactic; afterQuiet.applyMove(quiet);
+    std::vector<SearchCandidate> tactical = {
+        {win, 10, {win, find_legal_move(afterWin, "a8b8")}},
+        {quiet, 10, {quiet, find_legal_move(afterQuiet, "a8b8")}}
+    };
+    state = {};
+    const auto protectedChoice = chooseAdaptive(tactic, tactical, 0, state, 0, 1);
+    check(protectedChoice.index == 0 && protectedChoice.mode == "taktik" && state.tacticUntil >= 0,
+          "new material-winning tactic is protected before opening randomisation");
     return passed;
 }
 

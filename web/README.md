@@ -1,4 +1,4 @@
-# Virgin 0.8.6 â€“ WebAssembly / Browser
+# Virgin 0.8.7 â€“ WebAssembly / Browser
 
 Autor: Dirk D. Sommerfeld. EigenstÃ¤ndige Browser-Ausgabe der allgemeinen Virgin-Engine,
 mit Adaptive, Elo-Begrenzung, den fÃ¼nf Stilen Fortress/Stone/Normal/Fire/Thunder
@@ -103,7 +103,7 @@ verwenden. Ein anderer SDK-Pfad geht mit `--emsdk PFAD`, ein anderer Ausgabeordn
 mit `--output PFAD`. Der Windows-Build erkennt die hier Ã¼blichen CMake-/Ninja-Pfade;
 auf anderen Systemen mÃ¼ssen CMake und Ninja im PATH stehen.
 
-Quellen: `Virgin-0.8.6-Web-source.zip`. Die Engine behÃ¤lt die MIT-Lizenz in
+Quellen: `Virgin-0.8.7-Web-source.zip`. Die Engine behÃ¤lt die MIT-Lizenz in
 `ENGINE-LICENSE.txt`; Emscripten-/C++-Laufzeithinweise liegen unter `licenses/`.
 
 Technische Referenzen:

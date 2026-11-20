@@ -45,7 +45,7 @@ def main(args):
     try:
         e.send('uci');hello=e.until('uciok');assert 'option name Adaptive type check default false' in hello
         passed.append('Adaptive advertised as independent check option')
-        before=e.sync('setoption name Threads value 1','setoption name Hash value 1',
+        before=e.sync('setoption name OwnBook value false','setoption name Threads value 1','setoption name Hash value 1',
                       'setoption name Style value Furchtsam','setoption name Material.Pawn.Mg value 150',
                       'setoption name UCI_Elo value 700','setoption name UCI_LimitStrength value true','weights','eval')
         active=e.sync('setoption name Adaptive value true','weights','eval')

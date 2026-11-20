@@ -1,0 +1,10 @@
+{
+  "_hilfe": "Stimmung/Farbe aus Sicht des SPIELERS nach Tals Zug (cp): ausgeglichen = hellblau, Spieler vorn = gruen, Tal vorn = orange, rot, stinksauer. Die Position auf der Leiste folgt stufenlos 'voll_gruen_bei' (ganz links) bis 'voll_rot_bei' (ganz rechts).",
+  "voll_gruen_bei": 400,
+  "voll_rot_bei": -400,
+  "gesicht_gruen_ab": 250,
+  "gesicht_leicht_gruen_ab": 120,
+  "gesicht_orange_ab": -120,
+  "gesicht_rot_ab": -250,
+  "gesicht_stinksauer_ab": -400
+}

@@ -3,8 +3,9 @@
 #include <iosfwd>
 #include <string>
 
-// Port of CynusTactics TalChooser; all player scores have the opposite sign
-// from the engine's root scores. Parameters are embedded, no runtime files.
+// Based on CynusTactics TalChooser, with always-on safe equal-move sampling.
+// Player scores have the opposite sign from engine root scores.
+// Parameters are embedded, no runtime files.
 struct AdaptiveState {
     bool hold = false;
     int helped = 0, tacticUntil = -1;

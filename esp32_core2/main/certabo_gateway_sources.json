@@ -1,0 +1,7 @@
+{
+  "certabo_protocol.h": "d33f97c1e1058bc241ac5f723b233d86f55b8d8fe3277cddf22e25a6bee6c210",
+  "certabo_led_identity.h": "cdf0f0bfda23de36577a50d280f545f0f1a59da3bb2118a4817da8a61f544da9",
+  "certabo_spectrum_leds.h": "2a9b0de732a02150825baffb2c69edbab3bdfcc979a2a3fcd9c190a0c244c46b",
+  "certabo_startup.h": "2b043df4b3b9614ea5a9584243bc9dec86c16928f13562179e95798dc3ec9238",
+  "certabo_protocol.cpp": "e8623111187a8ddb66e9ef4026afa696dd2718cd5952f6f656b4139b6f03a0c0"
+}

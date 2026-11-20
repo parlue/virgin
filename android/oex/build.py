@@ -84,15 +84,15 @@ if not key.exists():
          '-alias','virgin-oex','-keyalg','RSA','-keysize','3072','-validity','10950',
          '-storepass:env','VIRGIN_OEX_KEY_PASSWORD','-keypass:env','VIRGIN_OEX_KEY_PASSWORD',
          '-dname','CN=Dirk D. Sommerfeld, O=Virgin Chess, C=DE'])
-dist=root/'dist/virgin-oex-0.8.6-20261115';dist.mkdir(parents=True,exist_ok=True)
-apkPath=dist/'Virgin-0.8.6-OEX.apk'
+dist=root/'dist/virgin-oex-0.8.7-20261120';dist.mkdir(parents=True,exist_ok=True)
+apkPath=dist/'Virgin-0.8.7-OEX.apk'
 signer=[jdk/'bin/java.exe','-jar',tools/'lib/apksigner.jar']
 run(signer+['sign','--ks',key,'--ks-key-alias','virgin-oex','--ks-pass','env:VIRGIN_OEX_KEY_PASSWORD',
             '--key-pass','env:VIRGIN_OEX_KEY_PASSWORD','--out',apkPath,aligned])
 run(signer+['verify','--verbose','--print-certs',apkPath])
 run([tools/'zipalign.exe','-c','-P','16','4',apkPath])
 shutil.copyfile(project/'README.md',dist/'README.md')
-manifest={'engine':'Virgin 0.8.6','author':'Dirk D. Sommerfeld','package':'de.dirksommerfeld.virgin.oex',
+manifest={'engine':'Virgin 0.8.7','author':'Dirk D. Sommerfeld','package':'de.dirksommerfeld.virgin.oex',
           'abis':abis,'apk':apkPath.name,'sha256':hashlib.sha256(apkPath.read_bytes()).hexdigest(),
           'minSdk':21,'targetSdk':36,'external_engine_files_required':False,'elf_page_alignment':16384,
           'signature':'dedicated local release key; v1/v2/v3 verified','engines':{}}

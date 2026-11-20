@@ -1,0 +1,1 @@
+Merida chess pieces: Armando Hernandez Marroquin, GPLv2 or later. Original local eChessTactics WebP assets and pixel conversion source included. Distributed under GPLv3; see licenses/GPL-3.0.txt.

@@ -1,6 +1,6 @@
 # Virgin - UCI Schachengine mit Stil-Bots
 
-Entwicklungskandidat: **Virgin 0.8.6 Beta** – [Stärkere Suche](docs/RELEASE_0.8.6.md). Dateien: `dist/virgin-0.8.6-20261115/`.
+Entwicklungskandidat: **Virgin 0.8.7 Beta** - [Release-Details](docs/RELEASE_0.8.7.md). Dateien: `dist/virgin-0.8.7-20261120/`.
 
 C++20-UCI-Engine, gebaut für **Bots**: aus Stärkestufe x Spielstil entstehen
 fertige Gegner. Alle Bewertungsgewichte sind von außen steuerbar.
@@ -34,6 +34,14 @@ Einzeln – alles über die Engine selbst, kein Hilfsskript nötig:
 .\run_match.cmd                       # Elo-Treppe gegen Stockfish 18 (1 s/Zug)
 .\tools\nightly.ps1                  # Nachtlauf: bauen + prüfen + Report
 ```
+
+## Eröffnungsbuch und Zugvielfalt
+
+Globales `OwnBook` (Standard **an**) für alle Spielmodi: 90 Varianten bis zehn
+Halbzüge, **2.037 Byte Buchdaten**, per `setoption name OwnBook value false`
+abschaltbar. Im adaptiven Modus werden sichere gleichwertige Suchzüge innerhalb
+von 20 Centipawns zufällig gewählt; erkannte taktische Fortsetzungen haben Vorrang.
+Details und Tests: [Eröffnungsbuch](docs/OPENING_BOOK.md).
 
 ## UCI-Kommandos
 
@@ -236,3 +244,9 @@ Elo-Kalibrierung - siehe `docs/ROADMAP.md`.
 Eigener Code, MIT. Es wurde kein Quellcode aus GPL-Engines übernommen; nur
 veröffentlichte Algorithmen und Ideen (Magic Bitboards, PVS, Texel-Tuning,
 MadChess-Muster für Limit-Strength).
+
+## Download
+
+[Virgin: aktuelle Version herunterladen](https://github.com/parlue/virgin/releases/latest)
+
+Downloads werden als GitHub-Release mit SHA-256-Pruefsumme bereitgestellt.

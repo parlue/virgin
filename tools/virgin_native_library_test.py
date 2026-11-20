@@ -25,13 +25,19 @@ try:
     checks.append('UCI identity, timeout and undersized-buffer retention')
     for invalid in [b'',b'uci\nquit',b'uci\rquit',b'x'*65537]:assert lib.virgin_send(h,invalid)==-1
     checks.append('Malformed and oversized input is rejected')
+    assert 'option name OwnBook type check default true' in lines
+    sync(h,'position startpos moves e2e4')
+    send(h,'go depth 6');book=until(h,'bestmove ')
+    assert any(s.startswith('info string book selected ') for s in book)
+    checks.append('Global opening book is enabled by default in native sessions')
+    sync(h,'setoption name OwnBook value false')
     sync(h,'setoption name Threads value 1','position startpos moves e2e4')
     send(h,'go depth 6');lines=until(h,'bestmove ');best=chess.Move.from_uci(lines[-1].split()[1]);board=chess.Board();board.push_uci('e2e4');assert best in board.legal_moves
     info=[s for s in lines if s.startswith('info depth 6 ')][-1]
     # Same algorithm/position/threads in the standalone executable must agree.
     # Wait interactively: EOF intentionally stops the stream front end.
     p=subprocess.Popen([sys.argv[2]],stdin=subprocess.PIPE,stdout=subprocess.PIPE,text=True)
-    p.stdin.write('setoption name Threads value 1\nposition startpos moves e2e4\ngo depth 6\n');p.stdin.flush();exe=[]
+    p.stdin.write('setoption name OwnBook value false\nsetoption name Threads value 1\nposition startpos moves e2e4\ngo depth 6\n');p.stdin.flush();exe=[]
     while True:
         s=p.stdout.readline().strip();exe.append(s)
         if s.startswith('bestmove '):break

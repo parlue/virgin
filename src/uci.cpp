@@ -8,6 +8,7 @@
 #include "embedded_worker.h"
 #endif
 #include "adaptive.h"
+#include "opening_book.h"
 #include "live_performance.h"
 #include <deque>
 #include <mutex>
@@ -90,10 +91,13 @@ Color g_adaptiveLastColor = WHITE;
 Key g_adaptiveChosenKey = 0;
 double g_adaptiveRoll = 1.0, g_adaptivePick = 0.0;
 std::mt19937 g_adaptiveRng(uint32_t(std::chrono::steady_clock::now().time_since_epoch().count()));
+std::string g_bookFen;
+Move g_bookMove = 0;
 
-void resetAdaptiveGame() {
+void resetAdaptiveGame(bool resetBook = true) {
     g_adaptiveState = {}; g_adaptiveBefore = {};
     g_adaptiveLastFen.clear(); g_adaptiveLastPly = -1; g_adaptiveChosenKey = 0;
+    if (resetBook) { g_bookFen.clear(); g_bookMove = 0; }
 }
 
 struct BotInfo {
@@ -165,6 +169,7 @@ void registerOptions() {
     addOption({"MultiPV", "spin", "1", "1", 1, 5, -1, {}});
 #endif
     addOption({"Adaptive", "check", "false", "false", 0, 0, -1, {}});
+    addOption({"OwnBook", "check", "true", "true", 0, 0, -1, {}});
     addOption({"LivePerformance", "check", "false", "false", 0, 0, -1, {}});
     addOption({"Ponder", "check", "false", "false", 0, 0, -1, {}});
 #ifndef VIRGIN_CORE2
@@ -270,11 +275,7 @@ void setAdaptive(bool enabled) {
     resetAdaptiveGame(); newSearchGame(); resetPerformance();
 }
 
-void applyAdaptiveChoice(SearchResult& result) {
-    if (result.candidates.empty()) {
-        uciOutput() << "info string adaptive incomplete: using legal full-strength fallback" << std::endl;
-        return;
-    }
+void prepareAdaptiveChoice() {
     const std::string fen = g_pos.fen();
     const int ply = int(std::min<int64_t>(int64_t(g_pos.fullmoveNumber() - 1) * 2
                                         + int(g_pos.sideToMove() == BLACK), 1000000000));
@@ -283,24 +284,23 @@ void applyAdaptiveChoice(SearchResult& result) {
     } else {
         if (g_adaptiveLastPly >= 0 && (ply != g_adaptiveLastPly + 2 || g_pos.sideToMove() != g_adaptiveLastColor
             || (g_gameKeys.size() >= 3 && g_gameKeys[g_gameKeys.size() - 2] != g_adaptiveChosenKey)))
-            resetAdaptiveGame();
+            resetAdaptiveGame(false);
         g_adaptiveBefore = g_adaptiveState;
         std::uniform_real_distribution<double> random(0.0, 1.0);
         g_adaptiveRoll = random(g_adaptiveRng); g_adaptivePick = random(g_adaptiveRng);
         g_adaptiveLastFen = fen; g_adaptiveLastPly = ply; g_adaptiveLastColor = g_pos.sideToMove();
     }
+}
+
+void applyAdaptiveChoice(SearchResult& result) {
+    if (result.candidates.empty()) {
+        uciOutput() << "info string adaptive incomplete: using legal full-strength fallback" << std::endl;
+        return;
+    }
+    prepareAdaptiveChoice();
+    const int ply = g_adaptiveLastPly;
     auto choice = chooseAdaptive(g_pos, result.candidates, ply, g_adaptiveState,
                                  g_adaptiveRoll, g_adaptivePick);
-#ifndef VIRGIN_CORE2
-    if (choice.mode == "eroeffnung" && result.openingVariety) {
-        choice.index = chooseOpeningCandidate(g_pos,result,g_adaptivePick);
-        if (choice.index) {
-            choice.mode = "eroeffnung_variante";
-            choice.afterEval = -result.candidates[choice.index].score;
-            g_adaptiveState.expected = choice.afterEval;
-        }
-    }
-#endif
     const auto& candidate = result.candidates[choice.index];
     const Move strongest = result.candidates.front().move;
     result.best = candidate.move; result.score = candidate.score; result.pv = candidate.pv;
@@ -427,6 +427,16 @@ void cmdSetOption(std::istringstream& is) {
         return;
     }
 #endif
+    if (name == "OwnBook") {
+        if (value != "true" && value != "false") {
+            uciOutput() << "info string OwnBook expects true or false" << std::endl;
+            return;
+        }
+        o->value = value;
+        for (auto& saved : g_savedOptions) if (saved.name == name) saved.value = value;
+        g_bookFen.clear(); g_bookMove = 0;
+        return;
+    }
     if (name == "LivePerformance") {
         if(value!="true" && value!="false") { uciOutput()<<"info string LivePerformance expects true or false"<<std::endl; return; }
         const bool previous=performanceActive();g_livePerformance=value=="true";o->value=value;
@@ -652,15 +662,26 @@ void cmdGo(std::istringstream& is) {
     const bool timed = limits.movetime>0 || limits.automaticTime>0 ||
         (g_pos.sideToMove()==WHITE ? limits.wtime>=0 : limits.btime>=0);
     limits.openingVariety = timed && !limits.infinite && !limits.restrictRootMoves &&
-        (g_adaptive || limits.multiPV==1) && g_pos.fullmoveNumber()<=4
-        && (g_adaptive || findOption("UCI_LimitStrength")->value != "true");
+        !g_adaptive && limits.multiPV==1 && g_pos.fullmoveNumber()<=4
+        && findOption("UCI_LimitStrength")->value != "true";
     if (limits.openingVariety && !g_adaptive) limits.multiPV = 3;
 #endif
+    Move book = 0;
+    if (findOption("OwnBook")->value == "true" && !limits.infinite &&
+        !limits.restrictRootMoves && !prepare) {
+        const std::string fen = g_pos.fen();
+        if (fen != g_bookFen) {
+            std::uniform_real_distribution<double> random(0.0, 1.0);
+            g_bookMove = OpeningBook::choose(g_pos, random(g_adaptiveRng));
+            g_bookFen = fen;
+        }
+        book = g_bookMove;
+    }
     std::atomic<bool> started{false};
 #ifdef VIRGIN_EMBEDDED
-    g_embeddedWorker.start([limits, prepare, speculativePonder, &started]() mutable {
+    g_embeddedWorker.start([limits, prepare, speculativePonder, book, &started]() mutable {
 #else
-    g_searchThread = std::thread([limits, prepare, speculativePonder, &started]() mutable {
+    g_searchThread = std::thread([limits, prepare, speculativePonder, book, &started]() mutable {
 #endif
         started.store(true,std::memory_order_release);
         const auto began=std::chrono::steady_clock::now();
@@ -673,6 +694,20 @@ void cmdGo(std::istringstream& is) {
         if(limits.automaticTime>0)limits.automaticTime=std::max<int>(1,limits.automaticTime-int(spent));
         if(g_pos.sideToMove()==WHITE && limits.wtime>=0)limits.wtime=std::max<int64_t>(0,limits.wtime-spent);
         if(g_pos.sideToMove()==BLACK && limits.btime>=0)limits.btime=std::max<int64_t>(0,limits.btime-spent);
+        if (book) {
+            if (g_adaptive) {
+                prepareAdaptiveChoice();
+                // No searched book score: do not invent accuracy samples.
+                g_adaptiveState.hasExpected = false;
+                Position chosen = g_pos; chosen.applyMove(book);
+                g_adaptiveChosenKey = chosen.key();
+            }
+            const UciOutputGuard guard;
+            uciOutput() << "info string book selected " << move_to_uci(book)
+                        << " data_bytes " << OpeningBook::dataBytes << std::endl;
+            uciOutput() << "bestmove " << move_to_uci(book) << std::endl;
+            return;
+        }
         if(prepare) {
             const Strength saved=g_strength;const int threads=threadCount();std::array<int,GROUP_NB> knowledge;
             std::copy_n(EW.knowledge,GROUP_NB,knowledge.begin());const bool changed=!fullPerformanceProfile();
@@ -982,7 +1017,7 @@ int uciRun(std::istream& input, std::ostream& output) {
                 preview >> word >> word; // setoption name
                 while (preview >> word && word != "value")
                     name += (name.empty() ? "" : " ") + word;
-                if (name != "Adaptive" && name != "LivePerformance"
+                if (name != "Adaptive" && name != "LivePerformance" && name != "OwnBook"
 #ifndef VIRGIN_CORE2
                     && name != "Move Overhead"
 #endif
